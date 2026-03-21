@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Service Mockup - Encuentra Profesionales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fb;
+            color: #1a2a3a;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            background: white;
+            border-radius: 60px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            outline: none;
+            border-radius: 40px;
+            background: #f8f9fa;
+        }
+
+        .search-bar button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-bar button:hover {
+            background: #5a67d8;
+        }
+
+        /* Layout */
+        .main-layout {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Filters Sidebar */
+        .filters {
+            width: 300px;
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .filter-section h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-option {
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-option label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .filter-option input[type="checkbox"],
+        .filter-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .rating-filter {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .rating-star {
+            color: #ffc107;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .range-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .range-input input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .apply-filters {
+            width: 100%;
+            padding: 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* Results */
+        .results {
+            flex: 1;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .total-results {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .sort-by {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sort-by select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Profile Cards */
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-trade {
+            background: #e9ecef;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .stars {
+            color: #ffc107;
+            letter-spacing: 2px;
+        }
+
+        .rating-value {
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .profile-details {
+            display: flex;
+            gap: 1rem;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+            color: #6c757d;
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .profile-description {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .certifications {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .cert-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .contact-btn {
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        /* API Info */
+        .api-info {
+            background: #1e2a3a;
+            color: #a0b3c9;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .api-info pre {
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filters {
+                width: 100%;
+            }
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .profile-avatar {
+                margin: 0 auto;
+            }
+            .profile-details {
+                justify-content: center;
+            }
+            .certifications {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Search Service</h1>
+        <p>Encuentra profesionales por oficio, zona, calificación y ubicación</p>
+    </div>
+
+    <div class="container">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre, oficio o especialidad... ej: 'plomero', 'electricista con experiencia'">
+            <button onclick="performSearch()">Buscar</button>
+        </div>
+
+        <div class="main-layout">
+            <!-- Filters Sidebar -->
+            <div class="filters">
+                <div class="filter-section">
+                    <h3>📂 OFICIO</h3>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="plomero" class="trade-filter"> Plomero</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="electricista" class="trade-filter"> Electricista</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="carpintero" class="trade-filter"> Carpintero</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="pintor" class="trade-filter"> Pintor</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="albañil" class="trade-filter"> Albañil</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>📍 ZONA (La Paz)</h3>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="sopocachi" class="zone-filter"> Sopocachi</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="calacoto" class="zone-filter"> Calacoto</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="san miguel" class="zone-filter"> San Miguel</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="el alto" class="zone-filter"> El Alto</label>
+                    </div>
+                    <div class="filter-option">
+                        <label><input type="checkbox" value="centro" class="zone-filter"> Centro</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>⭐ CALIFICACIÓN MÍNIMA</h3>
+                    <div class="rating-filter">
+                        <span class="rating-star" data-rating="1">★</span>
+                        <span class="rating-star" data-rating="2">★</span>
+                        <span class="rating-star" data-rating="3">★</span>
+                        <span class="rating-star" data-rating="4">★</span>
+                        <span class="rating-star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="minRating" value="0">
+                    <div class="range-input" style="margin-top: 10px;">
+                        <input type="number" id="minRatingInput" placeholder="Mín" min="0" max="5" step="0.5" value="0">
+                        <span>-</span>
+                        <input type="number" id="maxRatingInput" placeholder="Máx" min="0" max="5" step="0.5" value="5">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>📍 GEOLOCALIZACIÓN</h3>
+                    <div class="filter-option">
+                        <label><input type="checkbox" id="useGeo"> Usar mi ubicación (radio 10km)</label>
+                    </div>
+                    <div class="range-input">
+                        <input type="number" id="radiusInput" placeholder="Radio (km)" value="10" disabled>
+                    </div>
+                    <button class="apply-filters" onclick="applyFilters()">Aplicar Filtros</button>
+                </div>
+            </div>
+
+            <!-- Results Area -->
+            <div class="results">
+                <div class="results-header">
+                    <div class="total-results" id="totalResults">Mostrando 0 resultados</div>
+                    <div class="sort-by">
+                        <span>Ordenar por:</span>
+                        <select id="sortBy" onchange="performSearch()">
+                            <option value="rating">Mejor calificados</option>
+                            <option value="name">Nombre</option>
+                            <option value="distance">Distancia (si hay ubicación)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="resultsContainer">
+                    <!-- Results will be injected here -->
+                </div>
+
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be injected here -->
+                </div>
+
+                <!-- API Info Mockup -->
+                <div class="api-info">
+                    <strong>📡 API Endpoint (Mockup):</strong>
+                    <pre id="apiEndpoint">GET /search?q=plomero&trade=plomero&zone=sopocachi&minRating=4&lat=-16.5&lon=-68.15&radius=10&page=1&limit=10&sortBy=rating&sortOrder=desc</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data for professionals
+        const mockProfiles = [
+            { id: 1, name: "Carlos Méndez", trade: "plomero", zone: "sopocachi", city: "La Paz", rating: 4.8, location: { lat: -16.503, lon: -68.135 }, certifications: ["Instalaciones Sanitarias", "Bomba de Agua"], description: "Especialista en reparaciones de cañerías, instalación de baños y desagües. 10 años de experiencia.", available: true },
+            { id: 2, name: "Ana Laura Flores", trade: "electricista", zone: "calacoto", city: "La Paz", rating: 4.9, location: { lat: -16.527, lon: -68.078 }, certifications: ["Instalaciones Eléctricas Domiciliarias", "Energías Renovables"], description: "Instalaciones eléctricas, tableros, circuitos y reparaciones en general.", available: true },
+            { id: 3, name: "Roberto Condori", trade: "carpintero", zone: "san miguel", city: "La Paz", rating: 4.7, location: { lat: -16.522, lon: -68.085 }, certifications: ["Muebles a Medida", "Restauración"], description: "Fabricación de muebles, reparaciones y trabajos en madera.", available: true },
+            { id: 4, name: "María Gutiérrez", trade: "pintor", zone: "centro", city: "La Paz", rating: 4.5, location: { lat: -16.495, lon: -68.133 }, certifications: ["Pintura Decorativa", "Acabados Finos"], description: "Pintura de interiores y exteriores, empapelado y texturizados.", available: true },
+            { id: 5, name: "Javier Paredes", trade: "albañil", zone: "el alto", city: "El Alto", rating: 4.6, location: { lat: -16.509, lon: -68.163 }, certifications: ["Obra Civil", "Revoques"], description: "Construcción, remodelaciones, revoques y contrapisos.", available: true },
+            { id: 6, name: "Diego Torrez", trade: "plomero", zone: "calacoto", city: "La Paz", rating: 4.9, location: { lat: -16.528, lon: -68.079 }, certifications: ["Gas Domiciliario", "Termofusión"], description: "Especialista en instalaciones de gas, calefones y termotanques.", available: true },
+            { id: 7, name: "Lucía Fernández", trade: "electricista", zone: "sopocachi", city: "La Paz", rating: 4.8, location: { lat: -16.502, lon: -68.134 }, certifications: ["Domótica", "Sistemas de Seguridad"], description: "Instalaciones de cámaras, alarmas y automatización del hogar.", available: true },
+            { id: 8, name: "Pedro Mamani", trade: "carpintero", zone: "el alto", city: "El Alto", rating: 4.4, location: { lat: -16.512, lon: -68.165 }, certifications: ["Ebanistería"], description: "Trabajos en madera, puertas, ventanas y muebles rústicos.", available: true }
+        ];
+
+        let currentPage = 1;
+        let itemsPerPage = 5;
+        let currentFilters = {
+            q: "",
+            trades: [],
+            zones: [],
+            minRating: 0,
+            maxRating: 5,
+            useGeo: false,
+            lat: null,
+            lon: null,
+            radius: 10,
+            sortBy: "rating",
+            sortOrder: "desc"
+        };
+
+        // Initialize stars rating
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                document.getElementById('minRating').value = rating;
+                document.getElementById('minRatingInput').value = rating;
+                updateStarsUI(rating);
+            });
+        });
+
+        function updateStarsUI(rating) {
+            document.querySelectorAll('.rating-star').forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = '#ffc107';
+                    star.style.opacity = '1';
+                } else {
+                    star.style.color = '#dee2e6';
+                    star.style.opacity = '0.5';
+                }
+            });
+        }
+
+        // Geo location handler
+        document.getElementById('useGeo').addEventListener('change', function(e) {
+            const radiusInput = document.getElementById('radiusInput');
+            radiusInput.disabled = !e.target.checked;
+            if (e.target.checked) {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        currentFilters.lat = position.coords.latitude;
+                        currentFilters.lon = position.coords.longitude;
+                        console.log("Ubicación obtenida:", currentFilters.lat, currentFilters.lon);
+                    }, error => {
+                        alert("No se pudo obtener tu ubicación. Usando ubicación por defecto (La Paz)");
+                        currentFilters.lat = -16.5;
+                        currentFilters.lon = -68.15;
+                        document.getElementById('useGeo').checked = false;
+                        document.getElementById('radiusInput').disabled = true;
+                    });
+                } else {
+                    alert("Geolocalización no soportada");
+                    document.getElementById('useGeo').checked = false;
+                }
+            } else {
+                currentFilters.lat = null;
+                currentFilters.lon = null;
+            }
+        });
+
+        document.getElementById('radiusInput').addEventListener('change', function(e) {
+            currentFilters.radius = parseFloat(e.target.value) || 10;
+        });
+
+        document.getElementById('minRatingInput').addEventListener('change', function(e) {
+            currentFilters.minRating = parseFloat(e.target.value) || 0;
+            updateStarsUI(currentFilters.minRating);
+        });
+
+        document.getElementById('maxRatingInput').addEventListener('change', function(e) {
+            currentFilters.maxRating = parseFloat(e.target.value) || 5;
+        });
+
+        function performSearch() {
+            currentFilters.q = document.getElementById('searchInput').value;
+            currentPage = 1;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            // Get selected trades
+            currentFilters.trades = Array.from(document.querySelectorAll('.trade-filter:checked')).map(cb => cb.value);
+            // Get selected zones
+            currentFilters.zones = Array.from(document.querySelectorAll('.zone-filter:checked')).map(cb => cb.value);
+            // Get rating from inputs
+            currentFilters.minRating = parseFloat(document.getElementById('minRatingInput').value) || 0;
+            currentFilters.maxRating = parseFloat(document.getElementById('maxRatingInput').value) || 5;
+            // Get sort
+            currentFilters.sortBy = document.getElementById('sortBy').value;
+            
+            filterAndRender();
+        }
+
+        function filterAndRender() {
+            let filtered = [...mockProfiles];
+
+            // Text search
+            if (currentFilters.q) {
+                const searchTerm = currentFilters.q.toLowerCase();
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) || 
+                    p.trade.toLowerCase().includes(searchTerm) ||
+                    p.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Trade filter
+            if (currentFilters.trades.length > 0) {
+                filtered = filtered.filter(p => currentFilters.trades.includes(p.trade));
+            }
+
+            // Zone filter
+            if (currentFilters.zones.length > 0) {
+                filtered = filtered.filter(p => currentFilters.zones.includes(p.zone));
+            }
+
+            // Rating filter
+            filtered = filtered.filter(p => p.rating >= currentFilters.minRating && p.rating <= currentFilters.maxRating);
+
+            // Geo filter (simulate distance)
+            if (currentFilters.useGeo && currentFilters.lat && currentFilters.lon) {
+                filtered = filtered.map(p => {
+                    const distance = calculateDistance(
+                        currentFilters.lat, currentFilters.lon,
+                        p.location.lat, p.location.lon
+                    );
+                    return { ...p, distance };
+                }).filter(p => p.distance <= currentFilters.radius);
+            }
+
+            // Sorting
+            if (currentFilters.sortBy === 'rating') {
+                filtered.sort((a, b) => b.rating - a.rating);
+            } else if (currentFilters.sortBy === 'name') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (currentFilters.sortBy === 'distance' && currentFilters.useGeo) {
+                filtered.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+            }
+
+            // Update total
+            document.getElementById('totalResults').innerHTML = `Mostrando ${filtered.length} profesionales encontrados`;
+
+            // Pagination
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginated = filtered.slice(start, start + itemsPerPage);
+
+            renderResults(paginated);
+            renderPagination(totalPages);
+
+            // Update API endpoint display
+            updateApiEndpoint();
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function renderResults(profiles) {
+            const container = document.getElementById('resultsContainer');
+            if (profiles.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6c757d;">No se encontraron profesionales con esos criterios. 🛠️</div>';
+                return;
+            }
+
+            container.innerHTML = profiles.map(profile => `
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        ${profile.name.charAt(0)}
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">
+                            ${profile.name}
+                            <span class="profile-trade">${profile.trade.toUpperCase()}</span>
+                        </div>
+                        <div class="rating">
+                            <div class="stars">${'★'.repeat(Math.floor(profile.rating))}${profile.rating % 1 ? '½' : ''}${'☆'.repeat(5 - Math.ceil(profile.rating))}</div>
+                            <div class="rating-value">${profile.rating}</div>
+                        </div>
+                        <div class="profile-details">
+                            <span class="detail-item">📍 ${profile.zone}, ${profile.city}</span>
+                            ${profile.distance ? `<span class="detail-item">📏 a ${profile.distance.toFixed(1)} km</span>` : ''}
+                            <span class="detail-item">✅ Disponible</span>
+                        </div>
+                        <div class="profile-description">
+                            ${profile.description}
+                        </div>
+                        <div class="certifications">
+                            ${profile.certifications.map(cert => `<span class="cert-badge">📜 ${cert}</span>`).join('')}
+                        </div>
+                        <button class="contact-btn" onclick="contactWhatsApp('${profile.name}', '${profile.trade}')">
+                            💬 Contactar por WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let buttons = '';
+            for (let i = 1; i <= totalPages; i++) {
+                buttons += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            container.innerHTML = buttons;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            applyFilters();
+        }
+
+        function contactWhatsApp(name, trade) {
+            const message = encodeURIComponent(`Hola ${name}, te contacto desde la plataforma de servicios. Me interesa tu servicio de ${trade}.`);
+            window.open(`https://wa.me/59170000000?text=${message}`, '_blank');
+        }
+
+        function updateApiEndpoint() {
+            const params = new URLSearchParams();
+            if (currentFilters.q) params.append('q', currentFilters.q);
+            if (currentFilters.trades.length) params.append('trade', currentFilters.trades[0]);
+            if (currentFilters.zones.length) params.append('zone', currentFilters.zones[0]);
+            if (currentFilters.minRating > 0) params.append('minRating', currentFilters.minRating);
+            if (currentFilters.maxRating < 5) params.append('maxRating', currentFilters.maxRating);
+            if (currentFilters.useGeo && currentFilters.lat) params.append('lat', currentFilters.lat);
+            if (currentFilters.useGeo && currentFilters.lon) params.append('lon', currentFilters.lon);
+            if (currentFilters.useGeo) params.append('radius', currentFilters.radius);
+            params.append('page', currentPage);
+            params.append('limit', itemsPerPage);
+            params.append('sortBy', currentFilters.sortBy);
+            
+            const endpoint = `/search?${params.toString()}`;
+            document.getElementById('apiEndpoint').innerHTML = `GET ${endpoint}`;
+        }
+
+        // Initial render
+        applyFilters();
+    </script>
+</body>
+</html>
