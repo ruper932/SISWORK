@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>auth-service · API Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2128;
+    --border: rgba(255,255,255,0.07);
+    --border-hi: rgba(255,255,255,0.14);
+    --text: #e8e9eb;
+    --muted: #6b7280;
+    --dim: #3a3f4a;
+
+    --green: #1D9E75;
+    --green-bg: rgba(29,158,117,0.12);
+    --green-border: rgba(29,158,117,0.3);
+
+    --blue: #378ADD;
+    --blue-bg: rgba(55,138,221,0.12);
+    --blue-border: rgba(55,138,221,0.3);
+
+    --amber: #EF9F27;
+    --amber-bg: rgba(239,159,39,0.12);
+    --amber-border: rgba(239,159,39,0.3);
+
+    --red: #E24B4A;
+    --red-bg: rgba(226,75,74,0.12);
+    --red-border: rgba(226,75,74,0.3);
+
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .service-name {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .header-tags {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-hi);
+    color: var(--muted);
+    background: var(--surface);
+  }
+
+  /* Cards grid */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 0.1s forwards;
+  }
+
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+
+  .meta-card:hover {
+    border-color: var(--border-hi);
+  }
+
+  .meta-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: var(--mono);
+  }
+
+  .meta-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: var(--mono);
+  }
+
+  .meta-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  /* Section title */
+  .section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+
+  /* Endpoints */
+  .endpoints {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 0.2s forwards;
+  }
+
+  .endpoint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+
+  .endpoint:hover {
+    border-color: var(--border-hi);
+  }
+
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+  }
+
+  .method {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    min-width: 48px;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  .method.post-green {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+  }
+
+  .method.post-blue {
+    background: var(--blue-bg);
+    color: var(--blue);
+    border: 1px solid var(--blue-border);
+  }
+
+  .endpoint-path {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .endpoint-desc {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .endpoint-body {
+    border-top: 1px solid var(--border);
+    padding: 16px 18px;
+    display: none;
+    background: var(--surface2);
+  }
+
+  .endpoint.open .endpoint-body {
+    display: block;
+  }
+
+  .endpoint.open {
+    border-color: var(--border-hi);
+  }
+
+  .chevron {
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    font-family: var(--mono);
+  }
+
+  .endpoint.open .chevron {
+    transform: rotate(90deg);
+  }
+
+  /* Code block */
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #a8b5c8;
+    white-space: pre;
+    overflow-x: auto;
+    margin-top: 8px;
+    line-height: 1.7;
+  }
+
+  .code-block .key { color: #7ab0d6; }
+  .code-block .val { color: #98c898; }
+  .code-block .str { color: #e8a87c; }
+  .code-block .comment { color: #4a5568; }
+
+  .field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+
+  .field-label:first-child { margin-top: 0; }
+
+  /* Response badge */
+  .response-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .response-row:last-child { border-bottom: none; }
+
+  .status-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 36px;
+  }
+
+  .status-code.ok { color: var(--green); }
+  .status-code.err { color: var(--red); }
+
+  .response-desc {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Roles */
+  .roles-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 0.3s forwards;
+  }
+
+  .role-pill {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .role-pill.cliente  { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .role-pill.pro      { background: var(--blue-bg);  color: var(--blue);  border-color: var(--blue-border);  }
+  .role-pill.tecnico  { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+  .role-pill.admin    { background: var(--red-bg);   color: var(--red);   border-color: var(--red-border);   }
+
+  /* Domain */
+  .domain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 0.35s forwards;
+  }
+
+  .domain-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    transition: background 0.15s;
+  }
+
+  .domain-item:last-child { border-bottom: none; }
+  .domain-item:hover { background: var(--surface2); }
+
+  .domain-item::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--dim);
+    flex-shrink: 0;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 0.45s forwards;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  /* Animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .endpoints { animation-delay: 0.15s; }
+
+  @media (max-width: 560px) {
+    .meta-grid { grid-template-columns: 1fr 1fr; }
+    .header-tags { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="status-dot"></div>
+    <span class="service-name">auth-service</span>
+    <div class="header-tags">
+      <span class="tag">Go · Gin</span>
+      <span class="tag">HTTPS</span>
+      <span class="tag">:8080</span>
+    </div>
+  </div>
+
+  <!-- Meta cards -->
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="meta-label">Base de datos</div>
+      <div class="meta-value">PostgreSQL</div>
+      <div class="meta-sub">tabla: users</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Auth</div>
+      <div class="meta-value">JWT</div>
+      <div class="meta-sub">Bearer token</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Framework</div>
+      <div class="meta-value">Gin</div>
+      <div class="meta-sub">Go 1.21+</div>
+    </div>
+  </div>
+
+  <!-- Endpoints -->
+  <div class="section-title">API Endpoints</div>
+  <div class="endpoints">
+
+    <!-- POST /register -->
+    <div class="endpoint" onclick="toggle(this)">
+      <div class="endpoint-header">
+        <span class="method post-green">POST</span>
+        <span class="endpoint-path">/register</span>
+        <span class="endpoint-desc">Crea usuario · asigna rol</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="field-label">Request Body</div>
+        <div class="code-block"><span class="comment">// application/json</span>
+{
+  <span class="key">"name"</span>:     <span class="str">"Juan Pérez"</span>,
+  <span class="key">"email"</span>:    <span class="str">"juan@example.com"</span>,
+  <span class="key">"password"</span>: <span class="str">"••••••••"</span>,
+  <span class="key">"role"</span>:     <span class="str">"Cliente"</span>  <span class="comment">// Cliente | Pro | Técnico | Admin</span>
+}</div>
+        <div class="field-label">Respuestas</div>
+        <div class="response-row">
+          <span class="status-code ok">201</span>
+          <span class="response-desc">Usuario creado · devuelve ID y rol asignado</span>
+        </div>
+        <div class="response-row">
+          <span class="status-code err">400</span>
+          <span class="response-desc">Datos inválidos o campos faltantes</span>
+        </div>
+        <div class="response-row">
+          <span class="status-code err">409</span>
+          <span class="response-desc">Email ya registrado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- POST /login -->
+    <div class="endpoint" onclick="toggle(this)">
+      <div class="endpoint-header">
+        <span class="method post-blue">POST</span>
+        <span class="endpoint-path">/login</span>
+        <span class="endpoint-desc">Devuelve JWT · valida credenciales</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="field-label">Request Body</div>
+        <div class="code-block"><span class="comment">// application/json</span>
+{
+  <span class="key">"email"</span>:    <span class="str">"juan@example.com"</span>,
+  <span class="key">"password"</span>: <span class="str">"••••••••"</span>
+}</div>
+        <div class="field-label">Response 200</div>
+        <div class="code-block">{
+  <span class="key">"token"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIs..."</span>,
+  <span class="key">"role"</span>:  <span class="str">"Cliente"</span>,
+  <span class="key">"exp"</span>:   <span class="val">1735689600</span>
+}</div>
+        <div class="field-label">Respuestas</div>
+        <div class="response-row">
+          <span class="status-code ok">200</span>
+          <span class="response-desc">JWT generado · incluye rol y expiración</span>
+        </div>
+        <div class="response-row">
+          <span class="status-code err">401</span>
+          <span class="response-desc">Credenciales incorrectas</span>
+        </div>
+        <div class="response-row">
+          <span class="status-code err">404</span>
+          <span class="response-desc">Usuario no encontrado</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Roles -->
+  <div class="section-title" style="opacity:0;animation:fadeUp 0.5s ease 0.28s forwards;">Roles del sistema</div>
+  <div class="roles-row">
+    <span class="role-pill cliente">Cliente</span>
+    <span class="role-pill pro">Pro</span>
+    <span class="role-pill tecnico">Técnico</span>
+    <span class="role-pill admin">Admin</span>
+  </div>
+
+  <!-- Domain -->
+  <div class="section-title" style="opacity:0;animation:fadeUp 0.5s ease 0.33s forwards;">Dominio</div>
+  <div class="domain-list">
+    <div class="domain-item">Registro de nuevos usuarios</div>
+    <div class="domain-item">Login con validación de credenciales</div>
+    <div class="domain-item">Gestión y asignación de roles</div>
+    <div class="domain-item">Recuperación de contraseña</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="footer-text">auth-service · v1.0 · Go (Gin) · PostgreSQL · JWT</span>
+  </div>
+
+</div>
+
+<script>
+  function toggle(el) {
+    el.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
