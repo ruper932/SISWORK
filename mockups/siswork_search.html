@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SISWORK - Búsqueda</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b}
+  nav{background:#fff;padding:14px 32px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:800;color:#2563eb}.logo span{color:#f59e0b}
+  .nav-links a{text-decoration:none;color:#64748b;margin-left:20px;font-size:14px}
+  .layout{display:flex;gap:0;min-height:calc(100vh - 60px)}
+  .sidebar{width:280px;background:#fff;padding:24px;border-right:1px solid #e2e8f0;flex-shrink:0}
+  .sidebar h3{font-size:15px;font-weight:700;margin-bottom:16px;color:#374151}
+  .filter-group{margin-bottom:20px}
+  .filter-group label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px}
+  select,input[type=range]{width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none}
+  .oficio-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #e2e8f0;color:#64748b;background:#fff;transition:all 0.2s}
+  .chip.active{background:#2563eb;color:#fff;border-color:#2563eb}
+  .stars{display:flex;gap:4px;margin-top:6px}
+  .star-opt{padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+  .star-opt.active{background:#fbbf24;border-color:#fbbf24;color:#fff}
+  .btn-filter{width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;margin-top:8px}
+  .main{flex:1;padding:24px}
+  .search-bar{display:flex;gap:10px;margin-bottom:24px}
+  .search-bar input{flex:1;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none}
+  .search-bar input:focus{border-color:#2563eb}
+  .search-bar button{padding:12px 20px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+  .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .results-header h2{font-size:16px;font-weight:700}
+  .results-header span{font-size:13px;color:#64748b}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .provider-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;transition:transform 0.2s;border:2px solid transparent}
+  .provider-card:hover{transform:translateY(-3px);border-color:#2563eb}
+  .card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:800;flex-shrink:0}
+  .card-info h4{font-size:15px;font-weight:700}
+  .card-info p{font-size:12px;color:#64748b}
+  .badge-oficio{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-top:4px}
+  .rating{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .stars-disp{color:#fbbf24;font-size:14px}
+  .rating span{font-size:13px;color:#64748b}
+  .zona-tag{display:inline-block;background:#f1f5f9;color:#475569;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600}
+  .disp-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:4px}
+  .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9}
+  .btn-ver{padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+  .btn-chat{padding:8px 16px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+  .no-results{text-align:center;padding:60px;color:#94a3b8;font-size:15px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">SIS<span>WORK</span></div>
+  <div class="nav-links">
+    <a href="siswork_landing.html">Inicio</a>
+    <a href="siswork_bookings.html">Mis Solicitudes</a>
+    <a href="siswork_profiles.html">Mi Perfil</a>
+  </div>
+</nav>
+
+<div class="layout">
+  <div class="sidebar">
+    <h3>🔍 Filtros</h3>
+    <div class="filter-group">
+      <label>Oficio</label>
+      <div class="oficio-chips">
+        <div class="chip active" onclick="toggleChip(this)">Todos</div>
+        <div class="chip" onclick="toggleChip(this)">🔧 Plomería</div>
+        <div class="chip" onclick="toggleChip(this)">⚡ Electricidad</div>
+        <div class="chip" onclick="toggleChip(this)">🪵 Carpintería</div>
+        <div class="chip" onclick="toggleChip(this)">🧱 Albañilería</div>
+        <div class="chip" onclick="toggleChip(this)">🧹 Limpieza</div>
+        <div class="chip" onclick="toggleChip(this)">🎨 Pintura</div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Zona (La Paz)</label>
+      <select onchange="filterCards()">
+        <option value="">Todas las zonas</option>
+        <option>Miraflores</option><option>Sopocachi</option><option>San Pedro</option>
+        <option>Obrajes</option><option>Calacoto</option><option>Zona Sur</option>
+        <option>El Alto</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Calificación mínima</label>
+      <div class="stars">
+        <div class="star-opt" onclick="toggleStar(this)">⭐ 3+</div>
+        <div class="star-opt active" onclick="toggleStar(this)">⭐ 4+</div>
+        <div class="star-opt" onclick="toggleStar(this)">⭐ 4.5+</div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Disponibilidad</label>
+      <select>
+        <option>Cualquier momento</option>
+        <option>Disponible ahora</option>
+        <option>Esta semana</option>
+        <option>Fines de semana</option>
+      </select>
+    </div>
+    <button class="btn-filter" onclick="filterCards()">Aplicar filtros</button>
+  </div>
+
+  <div class="main">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Busca por nombre, oficio o zona..." oninput="filterCards()">
+      <button onclick="filterCards()">🔍 Buscar</button>
+    </div>
+    <div class="results-header">
+      <h2 id="results-title">Proveedores disponibles</h2>
+      <span id="results-count">8 resultados</span>
+    </div>
+    <div class="cards-grid" id="cards-container"></div>
+  </div>
+</div>
+
+<script>
+const providers = [
+  {name:"Pedro Mamani",oficio:"Plomería",zona:"Miraflores",rating:4.9,reviews:47,icon:"🔧",color:"#2563eb",disp:true,exp:"8 años"},
+  {name:"Luisa Quispe",oficio:"Limpieza",zona:"Sopocachi",rating:4.8,reviews:63,icon:"🧹",color:"#22c55e",disp:true,exp:"5 años"},
+  {name:"Carlos Torrez",oficio:"Electricidad",zona:"San Pedro",rating:4.7,reviews:31,icon:"⚡",color:"#f59e0b",disp:false,exp:"12 años"},
+  {name:"Ana Flores",oficio:"Limpieza",zona:"Obrajes",rating:4.9,reviews:89,icon:"🧹",color:"#22c55e",disp:true,exp:"3 años"},
+  {name:"Juan Condori",oficio:"Carpintería",zona:"Calacoto",rating:4.6,reviews:22,icon:"🪵",color:"#8b5cf6",disp:true,exp:"15 años"},
+  {name:"Rosa Aliaga",oficio:"Albañilería",zona:"Zona Sur",rating:4.5,reviews:18,icon:"🧱",color:"#ef4444",disp:false,exp:"10 años"},
+  {name:"Mario Copa",oficio:"Pintura",zona:"Miraflores",rating:4.8,reviews:35,icon:"🎨",color:"#ec4899",disp:true,exp:"7 años"},
+  {name:"Elena Chura",oficio:"Plomería",zona:"El Alto",rating:4.7,reviews:29,icon:"🔧",color:"#2563eb",disp:true,exp:"6 años"},
+];
+
+function renderCards(list){
+  const c=document.getElementById('cards-container');
+  document.getElementById('results-count').textContent=list.length+' resultados';
+  if(list.length===0){c.innerHTML='<div class="no-results">😔 No se encontraron resultados.<br>Intenta con otros filtros.</div>';return}
+  c.innerHTML=list.map(p=>`
+    <div class="provider-card" onclick="window.location.href='siswork_profiles.html'">
+      <div class="card-header">
+        <div class="avatar" style="background:${p.color}">${p.name.charAt(0)}</div>
+        <div class="card-info">
+          <h4>${p.name}</h4>
+          <p>${p.exp} experiencia</p>
+          <span class="badge-oficio" style="background:${p.color}22;color:${p.color}">${p.icon} ${p.oficio}</span>
+        </div>
+      </div>
+      <div class="rating">
+        <span class="stars-disp">${'★'.repeat(Math.round(p.rating))}</span>
+        <span>${p.rating} (${p.reviews} reseñas)</span>
+      </div>
+      <div>
+        <span class="zona-tag">📍 ${p.zona}</span>
+        <span style="margin-left:8px;font-size:12px;">
+          <span class="disp-dot" style="background:${p.disp?'#22c55e':'#ef4444'}"></span>
+          ${p.disp?'Disponible':'No disponible'}
+        </span>
+      </div>
+      <div class="card-footer">
+        <button class="btn-ver">Ver perfil</button>
+        <button class="btn-chat" onclick="event.stopPropagation();window.location.href='siswork_chat.html'">💬 Chat</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterCards(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const filtered=providers.filter(p=>p.name.toLowerCase().includes(q)||p.oficio.toLowerCase().includes(q)||p.zona.toLowerCase().includes(q));
+  renderCards(filtered);
+}
+
+function toggleChip(el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  filterCards();
+}
+function toggleStar(el){
+  document.querySelectorAll('.star-opt').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+renderCards(providers);
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SISWORK - Chat</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;height:100vh;display:flex;flex-direction:column}
+  nav{background:#fff;padding:14px 32px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);flex-shrink:0}
+  .logo{font-size:20px;font-weight:800;color:#2563eb}.logo span{color:#f59e0b}
+  .chat-layout{display:flex;flex:1;overflow:hidden}
+  .sidebar{width:300px;background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column}
+  .sidebar-header{padding:20px;border-bottom:1px solid #e2e8f0}
+  .sidebar-header h3{font-size:15px;font-weight:700;margin-bottom:12px}
+  .search-chat{width:100%;padding:9px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none}
+  .conversations{flex:1;overflow-y:auto}
+  .conv-item{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background 0.15s}
+  .conv-item:hover{background:#f8fafc}
+  .conv-item.active{background:#eff6ff;border-right:3px solid #2563eb}
+  .conv-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
+  .conv-info{flex:1;min-width:0}
+  .conv-name{font-size:14px;font-weight:700}
+  .conv-preview{font-size:12px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .conv-time{font-size:11px;color:#94a3b8}
+  .conv-badge{background:#2563eb;color:#fff;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:700}
+  .chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .chat-header{background:#fff;padding:16px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:14px}
+  .chat-header-avatar{width:44px;height:44px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}
+  .chat-header-info h3{font-size:15px;font-weight:700}
+  .chat-header-info p{font-size:12px;color:#64748b}
+  .online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:4px}
+  .chat-header-actions{margin-left:auto;display:flex;gap:8px}
+  .hdr-btn{padding:8px 14px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+  .chat-messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:70%;display:flex;flex-direction:column}
+  .msg.mine{align-self:flex-end;align-items:flex-end}
+  .msg.other{align-self:flex-start;align-items:flex-start}
+  .bubble{padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5}
+  .msg.mine .bubble{background:#2563eb;color:#fff;border-bottom-right-radius:4px}
+  .msg.other .bubble{background:#fff;color:#1e293b;box-shadow:0 1px 4px rgba(0,0,0,0.08);border-bottom-left-radius:4px}
+  .msg-time{font-size:11px;color:#94a3b8;margin-top:4px}
+  .msg-sender{font-size:12px;font-weight:700;color:#64748b;margin-bottom:4px}
+  .system-msg{text-align:center;font-size:12px;color:#94a3b8;padding:4px 12px;background:#f1f5f9;border-radius:20px;width:fit-content;align-self:center}
+  .chat-input{background:#fff;padding:16px 24px;border-top:1px solid #e2e8f0}
+  .input-row{display:flex;gap:10px;align-items:flex-end}
+  .msg-textarea{flex:1;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;outline:none;resize:none;font-family:inherit;max-height:120px;min-height:46px}
+  .msg-textarea:focus{border-color:#2563eb}
+  .btn-send{padding:12px 20px;background:#2563eb;color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:16px;flex-shrink:0}
+  .attach-btn{padding:12px;background:#f1f5f9;border:none;border-radius:12px;cursor:pointer;font-size:16px}
+  .booking-ref{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;font-size:12px;color:#2563eb;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">SIS<span>WORK</span></div>
+  <span style="color:#64748b;font-size:14px;cursor:pointer" onclick="window.location.href='siswork_bookings.html'">← Volver a solicitudes</span>
+</nav>
+
+<div class="chat-layout">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>💬 Mensajes</h3>
+      <input class="search-chat" type="text" placeholder="Buscar conversación...">
+    </div>
+    <div class="conversations">
+      <div class="conv-item active" onclick="selectConv(this)">
+        <div class="conv-avatar" style="background:#2563eb">P</div>
+        <div class="conv-info">
+          <div class="conv-name">Pedro Mamani</div>
+          <div class="conv-preview">Perfecto, llego a las 2pm ✓</div>
+        </div>
+        <div class="conv-meta"><div class="conv-time">14:30</div></div>
+      </div>
+      <div class="conv-item" onclick="selectConv(this)">
+        <div class="conv-avatar" style="background:#22c55e">L</div>
+        <div class="conv-info">
+          <div class="conv-name">Luisa Quispe</div>
+          <div class="conv-preview">¿Necesita traer materiales?</div>
+        </div>
+        <div class="conv-meta"><div class="conv-time">11:20</div><div class="conv-badge">2</div></div>
+      </div>
+      <div class="conv-item" onclick="selectConv(this)">
+        <div class="conv-avatar" style="background:#f59e0b">C</div>
+        <div class="conv-info">
+          <div class="conv-name">Carlos Torrez</div>
+          <div class="conv-preview">Servicio completado ✅</div>
+        </div>
+        <div class="conv-meta"><div class="conv-time">Ayer</div></div>
+      </div>
+      <div class="conv-item" onclick="selectConv(this)">
+        <div class="conv-avatar" style="background:#8b5cf6">J</div>
+        <div class="conv-info">
+          <div class="conv-name">Juan Condori</div>
+          <div class="conv-preview">Muchas gracias por la reseña</div>
+        </div>
+        <div class="conv-meta"><div class="conv-time">15 Mar</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-main">
+    <div class="chat-header">
+      <div class="chat-header-avatar">P</div>
+      <div class="chat-header-info">
+        <h3>Pedro Mamani Condori</h3>
+        <p><span class="online-dot"></span>En línea · 🔧 Plomero · Miraflores</p>
+      </div>
+      <div class="chat-header-actions">
+        <button class="hdr-btn">📱 WhatsApp</button>
+        <button class="hdr-btn">📋 Ver perfil</button>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="messages">
+      <div class="system-msg">🔧 Solicitud: "Reparación tubería cocina" · Hoy</div>
+      <div class="booking-ref">📋 Solicitud vinculada: Reparación tubería cocina · Sopocachi</div>
+
+      <div class="msg other">
+        <div class="msg-sender">Pedro Mamani</div>
+        <div class="bubble">Hola, vi tu solicitud de reparación de tubería. ¿Podría darme más detalles del problema?</div>
+        <div class="msg-time">13:45</div>
+      </div>
+
+      <div class="msg mine">
+        <div class="bubble">Hola Pedro, hay una fuga debajo del lavaplatos en la cocina. El agua gotea constantemente.</div>
+        <div class="msg-time">13:47</div>
+      </div>
+
+      <div class="msg other">
+        <div class="msg-sender">Pedro Mamani</div>
+        <div class="bubble">Entiendo. Probablemente es un sello o la manguera de desagüe. ¿Puedes enviarme una foto del área?</div>
+        <div class="msg-time">13:48</div>
+      </div>
+
+      <div class="msg mine">
+        <div class="bubble">📷 [Foto adjunta]</div>
+        <div class="msg-time">13:52</div>
+      </div>
+
+      <div class="msg other">
+        <div class="msg-sender">Pedro Mamani</div>
+        <div class="bubble">Veo el problema. Es el sello del sifón, tengo los materiales. ¿Puedo ir hoy a las 2pm? El trabajo tarda unos 30 minutos.</div>
+        <div class="msg-time">13:55</div>
+      </div>
+
+      <div class="msg mine">
+        <div class="bubble">Perfecto, te espero a las 2pm. La dirección es Calle Murillo #234, Sopocachi.</div>
+        <div class="msg-time">14:28</div>
+      </div>
+
+      <div class="msg other">
+        <div class="msg-sender">Pedro Mamani</div>
+        <div class="bubble">Perfecto, llego a las 2pm ✓</div>
+        <div class="msg-time">14:30</div>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <div class="input-row">
+        <button class="attach-btn">📎</button>
+        <textarea class="msg-textarea" id="msg-input" placeholder="Escribe un mensaje..." rows="1" onkeydown="handleKey(event)"></textarea>
+        <button class="btn-send" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function sendMsg(){
+  const input=document.getElementById('msg-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const messages=document.getElementById('messages');
+  const now=new Date();
+  const time=`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  messages.innerHTML+=`<div class="msg mine"><div class="bubble">${text}</div><div class="msg-time">${time}</div></div>`;
+  input.value='';
+  messages.scrollTop=messages.scrollHeight;
+  setTimeout(()=>{
+    messages.innerHTML+=`<div class="msg other"><div class="msg-sender">Pedro Mamani</div><div class="bubble">Entendido, gracias por la información 👍</div><div class="msg-time">${time}</div></div>`;
+    messages.scrollTop=messages.scrollHeight;
+  },1200);
+}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}}
+function selectConv(el){document.querySelectorAll('.conv-item').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
+document.getElementById('messages').scrollTop=999999;
+</script>
+</body>
+</html>
