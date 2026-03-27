@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SISWORK - Perfil</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b}
+  nav{background:#fff;padding:14px 32px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+  .logo{font-size:20px;font-weight:800;color:#2563eb}.logo span{color:#f59e0b}
+  .nav-links a{text-decoration:none;color:#64748b;margin-left:20px;font-size:14px}
+  .container{max-width:900px;margin:32px auto;padding:0 24px}
+  .profile-header{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:20px;padding:36px;color:#fff;position:relative;margin-bottom:24px}
+  .profile-header-inner{display:flex;align-items:flex-start;gap:24px}
+  .avatar-big{width:90px;height:90px;border-radius:50%;background:#fff3;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,0.5);flex-shrink:0}
+  .profile-info h1{font-size:26px;font-weight:800}
+  .profile-info p{opacity:0.85;font-size:14px;margin:4px 0}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.2)}
+  .profile-actions{position:absolute;top:24px;right:24px;display:flex;gap:10px}
+  .btn-edit{padding:9px 18px;background:#fff;color:#2563eb;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px}
+  .btn-wa{padding:9px 18px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px}
+  .btn-chat-main{padding:9px 18px;background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.5);border-radius:8px;font-weight:700;cursor:pointer;font-size:13px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+  .card h3{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat-item{text-align:center;background:#f8fafc;border-radius:10px;padding:14px}
+  .stat-item .num{font-size:26px;font-weight:800;color:#2563eb}
+  .stat-item .lbl{font-size:12px;color:#64748b;margin-top:2px}
+  .oficio-tags{display:flex;flex-wrap:wrap;gap:8px}
+  .oficio-tag{padding:7px 14px;border-radius:10px;font-size:13px;font-weight:700;background:#eff6ff;color:#2563eb}
+  .cert-list{list-style:none}
+  .cert-list li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+  .cert-list li:last-child{border:none}
+  .cert-icon{color:#22c55e;font-size:16px}
+  .reviews-list{display:flex;flex-direction:column;gap:12px}
+  .review{background:#f8fafc;border-radius:10px;padding:14px}
+  .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .reviewer{font-weight:700;font-size:13px}
+  .review-stars{color:#fbbf24;font-size:13px}
+  .review p{font-size:13px;color:#64748b}
+  .review-date{font-size:11px;color:#94a3b8;margin-top:4px}
+  .disp-horario{display:flex;flex-direction:column;gap:8px}
+  .dia-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+  .dia-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+  .avail{background:#dcfce7;color:#166534}
+  .unavail{background:#fee2e2;color:#991b1b}
+  .zona-info{display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:10px;padding:12px;margin-top:8px;font-size:14px}
+  .rating-big{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .rating-big .num{font-size:48px;font-weight:800;color:#2563eb}
+  .rating-big .stars{color:#fbbf24;font-size:20px}
+  .rating-big .sub{font-size:12px;color:#64748b;margin-top:2px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">SIS<span>WORK</span></div>
+  <div class="nav-links">
+    <a href="siswork_search.html">← Buscar</a>
+    <a href="siswork_bookings.html">Mis Solicitudes</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="profile-header">
+    <div class="profile-header-inner">
+      <div class="avatar-big">P</div>
+      <div class="profile-info">
+        <h1>Pedro Mamani Condori</h1>
+        <p>🔧 Plomero profesional · 8 años de experiencia</p>
+        <p>📍 Miraflores, La Paz</p>
+        <div class="badge-row">
+          <span class="badge">✅ Perfil verificado</span>
+          <span class="badge">⭐ 4.9/5</span>
+          <span class="badge">🟢 Disponible ahora</span>
+        </div>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <button class="btn-chat-main" onclick="window.location.href='siswork_chat.html'">💬 Chat</button>
+      <button class="btn-wa">📱 WhatsApp</button>
+      <button class="btn-edit">✏️ Editar perfil</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>📊 Estadísticas</h3>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="num">47</div><div class="lbl">Servicios completados</div></div>
+        <div class="stat-item"><div class="num">4.9</div><div class="lbl">Calificación promedio</div></div>
+        <div class="stat-item"><div class="num">98%</div><div class="lbl">Tasa de respuesta</div></div>
+        <div class="stat-item"><div class="num">8</div><div class="lbl">Años experiencia</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🛠️ Especialidades</h3>
+      <div class="oficio-tags">
+        <span class="oficio-tag">Instalación tuberías</span>
+        <span class="oficio-tag">Reparación filtraciones</span>
+        <span class="oficio-tag">Gas domiciliario</span>
+        <span class="oficio-tag">Desatoro cloacas</span>
+        <span class="oficio-tag">Cisterna/tanque</span>
+      </div>
+      <div class="zona-info">
+        <span>📍</span><span>Atiende: Miraflores, Sopocachi, San Pedro, Centro</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Certificaciones</h3>
+      <ul class="cert-list">
+        <li><span class="cert-icon">✅</span>CI verificada (copia presentada)</li>
+        <li><span class="cert-icon">✅</span>Curso Plomería Industrial - INFOCAL 2020</li>
+        <li><span class="cert-icon">✅</span>Instalación Gas GLP - YPFB 2022</li>
+        <li><span class="cert-icon">⏳</span>Seguridad Industrial (en proceso)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>🗓️ Disponibilidad</h3>
+      <div class="disp-horario">
+        <div class="dia-row"><span>Lunes - Viernes</span><span class="dia-badge avail">7:00 - 19:00</span></div>
+        <div class="dia-row"><span>Sábado</span><span class="dia-badge avail">8:00 - 14:00</span></div>
+        <div class="dia-row"><span>Domingo</span><span class="dia-badge unavail">No disponible</span></div>
+        <div class="dia-row"><span>Emergencias</span><span class="dia-badge avail">24/7 disponible</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1">
+      <h3>⭐ Calificaciones y Reseñas</h3>
+      <div class="rating-big">
+        <div class="num">4.9</div>
+        <div>
+          <div class="stars">★★★★★</div>
+          <div class="sub">Basado en 47 reseñas verificadas</div>
+        </div>
+      </div>
+      <div class="reviews-list">
+        <div class="review">
+          <div class="review-header"><span class="reviewer">María G.</span><span class="review-stars">★★★★★</span></div>
+          <p>Excelente trabajo, llegó puntual y resolvió el problema de la tubería rápidamente.</p>
+          <div class="review-date">Hace 3 días · Miraflores</div>
+        </div>
+        <div class="review">
+          <div class="review-header"><span class="reviewer">Carlos H.</span><span class="review-stars">★★★★★</span></div>
+          <p>Muy profesional. Instaló el medidor de gas sin problemas. Lo recomiendo.</p>
+          <div class="review-date">Hace 1 semana · Sopocachi</div>
+        </div>
+        <div class="review">
+          <div class="review-header"><span class="reviewer">Susana T.</span><span class="review-stars">★★★★☆</span></div>
+          <p>Buen trabajo en general. Un poco tardó en confirmar la cita pero cumplió.</p>
+          <div class="review-date">Hace 2 semanas · San Pedro</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
