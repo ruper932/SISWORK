@@ -4,6 +4,13 @@ import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 
 const loading = ref(false)
 const errorMessage = ref('')
+const config = useRuntimeConfig()
+const apiBase = String(config.public.apiBase || '')
+
+type VerifyTwoFactorResponse = {
+  access_token?: string
+  token_type?: string
+}
 
 const fields: AuthFormField[] = [
   {
@@ -17,22 +24,65 @@ const fields: AuthFormField[] = [
 ]
 
 const schema = z.object({
-  code: z.string().length(6, 'El código debe tener 6 dígitos')
+  code: z
+    .array(z.string())
+    .length(6, 'El código debe tener 6 dígitos')
+    .refine((digits) => digits.every((digit) => /^\d$/.test(digit)), {
+      message: 'El código debe tener 6 dígitos'
+    })
 })
 
-type Schema = z.output<typeof schema>
+type Schema = z.infer<typeof schema>
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   errorMessage.value = ''
 
   try {
-    console.log('2fa payload', event.data)
+    if (!import.meta.client) return
 
-    // aquí luego validaremos contra FastAPI
-    await navigateTo('/')
-  } catch (error) {
-    errorMessage.value = 'Código inválido'
+    const code = event.data.code.join('')
+    const challengeToken = localStorage.getItem('challenge_token')
+
+    if (!challengeToken) {
+      throw new Error('La sesión de verificación expiró. Inicia sesión nuevamente.')
+    }
+
+    if (!apiBase) {
+      throw new Error('NUXT_PUBLIC_API_BASE no está configurado')
+    }
+
+    const response = await $fetch<VerifyTwoFactorResponse>('/api/v1/auth/login/verify-2fa', {
+      baseURL: apiBase,
+      method: 'POST',
+      body: {
+        challenge_token: challengeToken,
+        code
+      }
+    })
+
+    if (!response.access_token) {
+      throw new Error('No se recibió el token de acceso')
+    }
+
+    localStorage.setItem('access_token', response.access_token)
+    localStorage.removeItem('challenge_token')
+
+    await navigateTo('/dashboard')
+  } catch (error: unknown) {
+    const apiError = error as {
+      data?: {
+        detail?: string
+        message?: string
+      }
+      message?: string
+    }
+
+    errorMessage.value =
+      apiError.data?.detail ??
+      apiError.data?.message ??
+      apiError.message ??
+      'Código inválido'
   } finally {
     loading.value = false
   }
