@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>bookings-service | Arquitectura</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   bookings-service · inline styles
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:       #080b14;
+  --bg2:      #0d1120;
+  --card-bg:  #111524;
+  --border:   #1e2540;
+  --border2:  #252d48;
+  --purple:   #a78bfa;
+  --purple-d: #7c3aed;
+  --blue:     #60a5fa;
+  --blue-d:   #2563eb;
+  --cyan:     #22d3ee;
+  --teal:     #2dd4bf;
+  --green:    #4ade80;
+  --orange:   #fb923c;
+  --pink:     #f472b6;
+  --yellow:   #fbbf24;
+  --red:      #f87171;
+  --nest:     #e0234e;
+  --pg-color: #4fc3f7;
+  --wa:       #25d366;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --muted2:   #94a3b8;
+  --mono:     'JetBrains Mono', monospace;
+  --head:     'Syne', sans-serif;
+  --radius:   14px;
+  --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;}
+
+/* CANVAS BG */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;}
+
+/* ── NAV ── */
+.top-nav{
+  background:rgba(13,17,32,.95);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+}
+.logo-cube{
+  width:32px;height:32px;
+  background:linear-gradient(135deg,var(--blue-d),var(--purple-d));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;color:#fff;
+  box-shadow:0 0 14px rgba(96,165,250,.4);
+}
+.logo-text{font-family:var(--head);font-weight:800;font-size:.95rem;color:var(--text);}
+.logo-accent{color:var(--blue);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.nav-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 12px;border-radius:20px;
+  font-size:.72rem;font-weight:600;
+}
+.chip-red  {background:rgba(224,35,78,.15);color:var(--red);border:1px solid rgba(224,35,78,.3);}
+.chip-cyan {background:rgba(79,195,247,.12);color:var(--pg-color);border:1px solid rgba(79,195,247,.3);}
+.chip-green{background:rgba(37,211,102,.12);color:var(--wa);border:1px solid rgba(37,211,102,.3);}
+
+.pulse-badge{display:flex;align-items:center;gap:8px;position:relative;}
+.pulse-ring{
+  position:absolute;left:0;
+  width:10px;height:10px;border-radius:50%;
+  background:var(--green);
+  animation:pulseRing 1.8s ease-out infinite;
+}
+.pulse-dot{width:10px;height:10px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);flex-shrink:0;}
+.pulse-label{font-size:.75rem;color:var(--green);margin-left:2px;}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.8;}100%{transform:scale(2.4);opacity:0;}}
+.version-tag{background:var(--border2);color:var(--muted2);font-size:.7rem;padding:3px 10px;border-radius:20px;}
+
+/* ── HERO ── */
+.hero-section{padding:70px 0 60px;position:relative;overflow:hidden;}
+.hg{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+.hg-1{width:500px;height:400px;background:radial-gradient(circle,rgba(99,102,241,.3),transparent 70%);top:-60px;left:-80px;}
+.hg-2{width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,.2),transparent 70%);top:20px;right:80px;}
+.hg-3{width:300px;height:300px;background:radial-gradient(circle,rgba(244,114,182,.18),transparent 70%);bottom:-50px;left:40%;}
+
+.overline-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.35);
+  color:#a78bfa;font-size:.75rem;font-weight:600;
+  padding:5px 14px;border-radius:20px;letter-spacing:.05em;
+}
+.hero-h1{font-family:var(--head);font-size:clamp(2.8rem,6vw,4.5rem);font-weight:900;line-height:1.05;}
+.h1-plain{color:var(--text);}
+.h1-gradient{
+  background:linear-gradient(135deg,var(--blue),var(--purple),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-p{color:var(--muted2);font-size:.92rem;line-height:1.75;max-width:500px;}
+.hero-p strong{color:var(--green);}
+
+.ep-hero{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:9px 18px;border-radius:10px;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;
+}
+.ep-hero:hover{transform:translateY(-2px);}
+.ep-post{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);}
+.ep-get {background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);}
+.ep-path{font-size:.85rem;color:var(--text);font-weight:600;}
+
+.stats-strip{
+  background:var(--card-bg);border:1px solid var(--border2);
+  border-radius:var(--radius);overflow:hidden;
+  display:inline-flex !important;
+}
+.stat-box{padding:14px 24px;text-align:center;}
+.stat-num{
+  font-family:var(--head);font-size:1.6rem;font-weight:900;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.online-num{background:none!important;-webkit-text-fill-color:var(--green)!important;font-size:1rem;line-height:2;text-shadow:0 0 8px var(--green);}
+.stat-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.stat-sep{width:1px;background:var(--border2);margin:10px 0;}
+
+/* ARCH CARD */
+.arch-card{
+  background:var(--card-bg);border:1px solid var(--border2);
+  border-radius:var(--radius);overflow:hidden;
+  width:100%;max-width:420px;
+  box-shadow:0 0 40px rgba(99,102,241,.15);
+}
+.arch-card-header{
+  background:linear-gradient(90deg,rgba(96,165,250,.15),rgba(167,139,250,.1));
+  border-bottom:1px solid var(--border2);
+  padding:12px 20px;font-size:.82rem;font-weight:700;
+  color:var(--blue);display:flex;align-items:center;gap:8px;
+}
+.arch-card-body{padding:24px;}
+.anode{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:12px 24px;border-radius:var(--radius-sm);
+  font-size:.82rem;font-weight:600;text-align:center;border:1px solid;
+  transition:transform .2s,box-shadow .2s;
+}
+.anode:hover{transform:scale(1.04);}
+.anode-client{background:rgba(30,37,64,.9);border-color:var(--border2);color:var(--muted2);flex-direction:row;gap:8px;}
+.anode-service{
+  background:linear-gradient(135deg,rgba(37,56,130,.5),rgba(99,57,200,.3));
+  border-color:var(--blue);color:var(--blue);padding:14px 32px;
+  box-shadow:0 0 20px rgba(96,165,250,.25);
+}
+.anode-service small{color:var(--muted);font-size:.7rem;font-weight:400;}
+.anode-db{background:rgba(51,103,145,.2);border-color:var(--pg-color);color:var(--pg-color);}
+.anode-db small{color:var(--muted);font-size:.7rem;font-weight:400;}
+.anode-wa{background:rgba(37,211,102,.1);border-color:var(--wa);color:var(--wa);}
+.anode-wa small{color:var(--muted);font-size:.7rem;font-weight:400;}
+.arch-arr{color:var(--blue);font-size:1.1rem;animation:arrowBounce 1.8s ease-in-out infinite;}
+.small-arr{font-size:.9rem;}
+@keyframes arrowBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+.arch-split-line{
+  width:180px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),var(--blue),var(--border2),transparent);
+}
+
+/* ── CONTENT SECTION ── */
+.content-section{padding-top:0;padding-bottom:24px;position:relative;z-index:1;}
+
+/* ── BCARDS ── */
+.bcard{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;
+  position:relative;overflow:hidden;
+  transition:border-color .3s,transform .25s,box-shadow .3s;
+}
+.bcard:hover{transform:translateY(-4px);}
+.bcard-purple:hover{border-color:var(--purple);box-shadow:0 8px 40px rgba(167,139,250,.18);}
+.bcard-blue:hover  {border-color:var(--blue);  box-shadow:0 8px 40px rgba(96,165,250,.18);}
+.bcard-teal:hover  {border-color:var(--teal);  box-shadow:0 8px 40px rgba(45,212,191,.18);}
+.bcard-orange:hover{border-color:var(--orange);box-shadow:0 8px 40px rgba(251,146,60,.18);}
+.bcard-pink:hover  {border-color:var(--pink);  box-shadow:0 8px 40px rgba(244,114,182,.18);}
+
+.card-glow{
+  position:absolute;border-radius:50%;pointer-events:none;z-index:0;
+  filter:blur(60px);opacity:.13;width:220px;height:220px;bottom:-70px;right:-70px;
+}
+.cglow-purple{background:var(--purple);}
+.cglow-blue  {background:var(--blue);}
+.cglow-teal  {background:var(--teal);}
+.cglow-orange{background:var(--orange);}
+.cglow-pink  {background:var(--pink);}
+
+.bcard-top{
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);
+  padding-bottom:14px;position:relative;z-index:1;
+}
+.bcard-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.icon-purple{background:rgba(167,139,250,.18);color:var(--purple);}
+.icon-blue  {background:rgba(96,165,250,.15); color:var(--blue);}
+.icon-teal  {background:rgba(45,212,191,.15); color:var(--teal);}
+.icon-orange{background:rgba(251,146,60,.15); color:var(--orange);}
+.icon-pink  {background:rgba(244,114,182,.15);color:var(--pink);}
+
+.bcard-title{font-family:var(--head);font-weight:700;font-size:.96rem;color:var(--text);}
+.bcard-sub{font-size:.72rem;color:var(--muted);margin-top:2px;}
+
+.corner-badge{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.cb-purple{background:rgba(167,139,250,.15);color:var(--purple);}
+.cb-blue  {background:rgba(96,165,250,.12); color:var(--blue);}
+.cb-teal  {background:rgba(45,212,191,.12); color:var(--teal);}
+.cb-orange{background:rgba(251,146,60,.12); color:var(--orange);}
+.cb-pink  {background:rgba(244,114,182,.12);color:var(--pink);}
+
+/* RESP LIST */
+.resp-list{list-style:none;padding:0;position:relative;z-index:1;}
+.resp-list li{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;font-size:.84rem;color:var(--muted2);
+  border-bottom:1px solid var(--border);transition:color .2s;
+}
+.resp-list li:last-child{border-bottom:none;}
+.resp-list li:hover{color:var(--text);}
+.rdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor;}
+.rdot-purple{background:var(--purple);color:var(--purple);}
+.rdot-blue  {background:var(--blue);  color:var(--blue);}
+.rdot-cyan  {background:var(--cyan);  color:var(--cyan);}
+.rdot-green {background:var(--green); color:var(--green);}
+.rdot-orange{background:var(--orange);color:var(--orange);}
+
+/* ENDPOINTS */
+.ep-block{border-radius:var(--radius-sm);padding:14px;position:relative;z-index:1;}
+.ep-block-post{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);}
+.ep-block-get {background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.2);}
+.method-tag{font-size:.68rem;font-weight:800;padding:2px 9px;border-radius:5px;letter-spacing:.05em;}
+.method-post{background:var(--red);color:#fff;}
+.method-get {background:var(--cyan);color:#0a0e1a;}
+.ep-code{font-size:.84rem;color:var(--text);font-family:var(--mono);}
+.ep-desc{font-size:.78rem;color:var(--muted);margin:0;}
+.ep-tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.ep-tag{font-size:.65rem;padding:2px 8px;border-radius:4px;background:var(--border2);color:var(--muted2);}
+.success-tag{background:rgba(74,222,128,.12);color:var(--green);}
+
+/* STACK */
+.sk-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+  position:relative;z-index:1;
+}
+.sk-item:last-child{border-bottom:none;}
+.sk-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.sk-nest{background:rgba(224,35,78,.15);color:var(--nest);}
+.sk-pg  {background:rgba(79,195,247,.12);color:var(--pg-color);}
+.sk-wa  {background:rgba(37,211,102,.12);color:var(--wa);}
+.sk-name{font-size:.86rem;font-weight:700;color:var(--text);}
+.sk-desc{font-size:.72rem;color:var(--muted);}
+.sk-progress{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:60px;}
+.sk-bar{width:60px;height:4px;background:var(--border2);border-radius:4px;overflow:hidden;}
+.sk-fill{height:100%;border-radius:4px;transition:width 1.2s ease;}
+.sf-nest{background:linear-gradient(90deg,var(--nest),#ff6b9d);}
+.sf-pg  {background:linear-gradient(90deg,var(--pg-color),var(--cyan));}
+.sf-wa  {background:linear-gradient(90deg,var(--wa),#a8edca);}
+.sk-pct{font-size:.65rem;color:var(--muted);}
+
+/* FOLDER TREE */
+.ftree{font-size:.78rem;font-family:var(--mono);position:relative;z-index:1;}
+.frow{
+  display:flex;align-items:center;gap:7px;padding:4px 0;
+  border-radius:4px;cursor:default;
+  transition:background .15s,padding-left .15s;
+}
+.frow:hover{background:rgba(255,255,255,.04);}
+.f-root{padding-left:4px;}
+.f-l1  {padding-left:18px;}
+.f-l2  {padding-left:36px;}
+.f-l3  {padding-left:54px;}
+.fi{font-size:.85rem;flex-shrink:0;}
+.fi-root {color:var(--orange);}
+.fi-src  {color:#60a5fa;}
+.fi-ctrl {color:#a78bfa;}
+.fi-svc  {color:#f472b6;}
+.fi-dto  {color:var(--cyan);}
+.fi-ent  {color:var(--teal);}
+.fi-wa   {color:var(--wa);}
+.fi-ts   {color:#4ec9b0;}
+.fi-html {color:#e96950;}
+.fi-html-f{color:#e96950;}
+.fi-css  {color:#5b9af5;}
+.fi-css-f{color:#5b9af5;}
+.fi-js   {color:#f0c27f;}
+.fi-js-f {color:#f0c27f;}
+.fi-json {color:var(--yellow);}
+.fn{color:var(--text);}
+.fn-root{color:var(--orange);font-weight:700;}
+.fn-file{color:var(--muted2);}
+.fbadge{font-size:.6rem;padding:1px 7px;border-radius:4px;font-weight:700;margin-left:auto;margin-right:4px;}
+.fb-ts  {background:rgba(78,201,176,.15);color:#4ec9b0;}
+.fb-html{background:rgba(233,105,80,.15);color:#e96950;}
+.fb-css {background:rgba(91,154,245,.15);color:#5b9af5;}
+.fb-js  {background:rgba(240,194,127,.15);color:var(--yellow);}
+.fb-json{background:rgba(251,191,36,.15);color:var(--yellow);}
+.fb-wa  {background:rgba(37,211,102,.12);color:var(--wa);}
+.lang-pill{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:4px;}
+.lp-ts  {background:rgba(78,201,176,.15);color:#4ec9b0;}
+.lp-html{background:rgba(233,105,80,.15);color:#e96950;}
+.lp-css {background:rgba(91,154,245,.15);color:#5b9af5;}
+.lp-js  {background:rgba(240,194,127,.15);color:var(--yellow);}
+
+/* FLOW TIMELINE */
+.flow-timeline{position:relative;z-index:1;}
+.ft-item{display:flex;gap:16px;padding-bottom:4px;}
+.ft-left{display:flex;flex-direction:column;align-items:center;}
+.ft-num{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--head);font-weight:900;font-size:.82rem;
+  border:2px solid;flex-shrink:0;
+}
+.fn-1{background:rgba(248,113,113,.15);color:var(--red);    border-color:var(--red);    box-shadow:0 0 10px rgba(248,113,113,.3);}
+.fn-2{background:rgba(79,195,247,.12); color:var(--pg-color);border-color:var(--pg-color);box-shadow:0 0 10px rgba(79,195,247,.3);}
+.fn-3{background:rgba(167,139,250,.15);color:var(--purple); border-color:var(--purple); box-shadow:0 0 10px rgba(167,139,250,.3);}
+.fn-4{background:rgba(37,211,102,.12); color:var(--wa);     border-color:var(--wa);     box-shadow:0 0 10px rgba(37,211,102,.25);}
+.fn-5{background:rgba(34,211,238,.1);  color:var(--cyan);   border-color:var(--cyan);   box-shadow:0 0 10px rgba(34,211,238,.25);}
+.ft-connector{width:2px;flex:1;min-height:28px;background:linear-gradient(180deg,var(--border2),transparent);margin:6px 0;}
+.ft-content{padding-bottom:20px;padding-top:6px;}
+.ft-title{font-size:.86rem;font-weight:700;color:var(--text);}
+.ft-desc{font-size:.77rem;color:var(--muted);margin-top:3px;}
+.ft-desc code{color:var(--cyan);background:rgba(34,211,238,.08);padding:1px 5px;border-radius:4px;}
+.ft-chips{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.ft-chip{font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:5px;}
+.chip-post   {background:rgba(248,113,113,.15);color:var(--red);    border:1px solid rgba(248,113,113,.3);}
+.chip-get    {background:rgba(34,211,238,.1);  color:var(--cyan);   border:1px solid rgba(34,211,238,.25);}
+.chip-db     {background:rgba(79,195,247,.12); color:var(--pg-color);border:1px solid rgba(79,195,247,.3);}
+.chip-svc    {background:rgba(167,139,250,.12);color:var(--purple); border:1px solid rgba(167,139,250,.3);}
+.chip-wa     {background:rgba(37,211,102,.1);  color:var(--wa);     border:1px solid rgba(37,211,102,.25);}
+.chip-neutral{background:var(--border2);color:var(--muted2);border:1px solid var(--border);}
+
+/* FOOTER */
+.site-footer{background:var(--bg2);border-top:1px solid var(--border);color:var(--muted);font-size:.74rem;position:relative;z-index:1;}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);animation:revealUp .55s ease forwards;}
+@keyframes revealUp{to{opacity:1;transform:translateY(0);}}
+
+/* ── BTN SIMULATOR ── */
+.btn-sim{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,var(--blue-d),var(--purple-d));
+  border:none;border-radius:12px;
+  padding:13px 24px;cursor:pointer;
+  font-family:var(--mono);font-size:.88rem;font-weight:700;
+  color:#fff;
+  box-shadow:0 0 30px rgba(96,165,250,.35);
+  transition:transform .2s,box-shadow .3s;
+  position:relative;z-index:1;
+}
+.btn-sim:hover{transform:translateY(-3px);box-shadow:0 0 50px rgba(96,165,250,.55);}
+.btn-sim-icon{font-size:1.1rem;}
+.btn-sim-arrow{
+  background:rgba(255,255,255,.15);
+  border-radius:6px;padding:2px 8px;
+  font-size:.85rem;
+  transition:transform .2s;
+}
+.btn-sim:hover .btn-sim-arrow{transform:translateX(4px);}
+
+/* ════════════════════════════════════════════
+   SIMULATOR VIEW
+════════════════════════════════════════════ */
+#simulator-view{
+  display:none;
+  position:fixed;inset:0;
+  background:var(--bg);
+  z-index:200;
+  overflow-y:auto;
+  animation:slideIn .4s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+/* SIM NAV */
+.sim-nav{
+  background:rgba(13,17,32,.95);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+  position:sticky;top:0;z-index:10;
+}
+.sim-nav-title{font-family:var(--head);font-weight:800;font-size:.95rem;color:var(--text);}
+.sim-nav-title span{color:var(--blue);}
+.btn-back{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--border2);border:1px solid var(--border);
+  border-radius:8px;padding:7px 14px;
+  font-family:var(--mono);font-size:.78rem;color:var(--muted2);
+  cursor:pointer;transition:all .2s;
+}
+.btn-back:hover{color:var(--text);border-color:var(--blue);}
+
+/* SIM TABS */
+.sim-tabs{
+  display:flex;gap:4px;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:6px;
+}
+.sim-tab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px 16px;border-radius:10px;
+  font-family:var(--mono);font-size:.8rem;font-weight:600;
+  cursor:pointer;color:var(--muted);
+  transition:all .2s;border:none;background:transparent;
+}
+.sim-tab.active{background:linear-gradient(135deg,rgba(96,165,250,.2),rgba(167,139,250,.15));color:var(--text);border:1px solid var(--border2);}
+.sim-tab:hover:not(.active){color:var(--text);background:rgba(255,255,255,.04);}
+.sim-tab i{font-size:1rem;}
+
+/* SIM PANELS */
+.sim-panel{display:none;}
+.sim-panel.active{display:block;}
+
+/* FORM STYLES */
+.sim-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;
+  position:relative;overflow:hidden;
+}
+.sim-card:hover{border-color:var(--border2);}
+.sim-section-title{
+  font-family:var(--head);font-weight:800;font-size:1.1rem;
+  color:var(--text);display:flex;align-items:center;gap:10px;
+  margin-bottom:6px;
+}
+.sim-section-title i{color:var(--blue);}
+.sim-section-sub{font-size:.78rem;color:var(--muted);margin-bottom:20px;}
+
+.sim-label{font-size:.75rem;color:var(--muted2);margin-bottom:5px;font-weight:600;letter-spacing:.04em;}
+.sim-input,.sim-select,.sim-textarea{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border2);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  padding:9px 14px;
+  font-family:var(--mono);font-size:.82rem;
+  width:100%;
+  transition:border-color .2s,box-shadow .2s;
+}
+.sim-input:focus,.sim-select:focus,.sim-textarea:focus{
+  outline:none;
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(96,165,250,.15);
+}
+.sim-select option{background:#1a1f30;color:var(--text);}
+.sim-textarea{resize:vertical;min-height:80px;}
+
+.btn-primary-sim{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--blue-d),var(--purple-d));
+  border:none;border-radius:var(--radius-sm);
+  padding:10px 22px;
+  font-family:var(--mono);font-size:.82rem;font-weight:700;color:#fff;
+  cursor:pointer;transition:transform .2s,box-shadow .2s;
+}
+.btn-primary-sim:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(96,165,250,.3);}
+.btn-danger-sim{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.35);
+  border-radius:var(--radius-sm);padding:10px 22px;
+  font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--red);
+  cursor:pointer;transition:all .2s;
+}
+.btn-danger-sim:hover{background:rgba(248,113,113,.25);}
+.btn-success-sim{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);
+  border-radius:var(--radius-sm);padding:10px 22px;
+  font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--green);
+  cursor:pointer;transition:all .2s;
+}
+.btn-success-sim:hover{background:rgba(74,222,128,.2);}
+
+/* BOOKING CARDS */
+.booking-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  transition:border-color .25s,transform .2s;
+}
+.booking-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.bk-status{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.status-pending  {background:rgba(251,191,36,.15);color:var(--yellow);}
+.status-assigned {background:rgba(96,165,250,.15); color:var(--blue);}
+.status-done     {background:rgba(74,222,128,.12); color:var(--green);}
+.status-cancelled{background:rgba(248,113,113,.12);color:var(--red);}
+
+.bk-id{font-size:.7rem;color:var(--muted);font-family:var(--mono);}
+.bk-title{font-size:.9rem;font-weight:700;color:var(--text);margin:4px 0;}
+.bk-meta{font-size:.75rem;color:var(--muted2);}
+.bk-meta i{margin-right:4px;}
+.bk-divider{height:1px;background:var(--border);margin:10px 0;}
+
+/* TECH CARD */
+.tech-card{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  transition:border-color .25s,transform .2s;
+  cursor:pointer;
+}
+.tech-card:hover{border-color:var(--teal);transform:translateY(-2px);}
+.tech-card.selected{border-color:var(--teal);box-shadow:0 0 20px rgba(45,212,191,.2);}
+.tech-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;font-weight:800;font-family:var(--head);
+  flex-shrink:0;
+}
+.tech-name{font-size:.9rem;font-weight:700;color:var(--text);}
+.tech-spec{font-size:.72rem;color:var(--muted2);margin-top:2px;}
+.tech-rating{font-size:.72rem;color:var(--yellow);}
+.avail-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.avail-yes{background:var(--green);box-shadow:0 0 6px var(--green);}
+.avail-busy{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+.skill-tag{
+  font-size:.62rem;padding:2px 8px;border-radius:4px;
+  background:var(--border2);color:var(--muted2);
+}
+
+/* TOAST */
+.sim-toast{
+  position:fixed;bottom:28px;right:28px;
+  background:var(--card-bg);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
+  z-index:300;font-size:.82rem;
+  transform:translateY(80px);opacity:0;
+  transition:transform .35s ease,opacity .35s ease;
+  max-width:320px;
+}
+.sim-toast.show{transform:translateY(0);opacity:1;}
+.toast-icon{font-size:1.2rem;}
+
+/* STATS BAR */
+.sim-stat{
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 20px;
+  text-align:center;
+}
+.sim-stat-num{font-family:var(--head);font-size:1.8rem;font-weight:900;}
+.sim-stat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- ═══ NAV ═══ -->
+<nav class="top-nav py-3">
+  <div class="d-flex align-items-center gap-3">
+    <div class="logo-cube"><i class="bi bi-box-seam-fill"></i></div>
+    <span class="logo-text">bookings<span class="logo-accent">-service</span></span>
+    <div class="nav-sep"></div>
+    <span class="nav-chip chip-red"><i class="bi bi-cpu-fill"></i> NestJS</span>
+    <span class="nav-chip chip-cyan d-none d-md-inline-flex"><i class="bi bi-database-fill"></i> PostgreSQL</span>
+    <span class="nav-chip chip-green d-none d-md-inline-flex"><i class="bi bi-whatsapp"></i> WhatsApp</span>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="pulse-badge">
+      <span class="pulse-ring"></span>
+      <span class="pulse-dot"></span>
+      <span class="pulse-label d-none d-sm-inline">Microservicio activo</span>
+    </div>
+    <span class="version-tag">v2.4.1</span>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero-section position-relative overflow-hidden">
+  <div class="hg hg-1"></div>
+  <div class="hg hg-2"></div>
+  <div class="hg hg-3"></div>
+  <div class="container-fluid px-4 px-lg-5 position-relative">
+    <div class="row g-5 align-items-center">
+
+      <!-- LEFT -->
+      <div class="col-lg-6 reveal">
+        <div class="overline-pill mb-3">
+          <i class="bi bi-grid-3x3-gap-fill"></i> Arquitectura de Microservicios
+        </div>
+        <h1 class="hero-h1 mt-3">
+          <span class="h1-plain">bookings</span>
+          <span class="h1-gradient">-service</span>
+        </h1>
+        <p class="hero-p mt-3">
+          Gestión completa del ciclo de vida de reservas — solicitudes, publicaciones,
+          asignación de técnicos y contacto directo vía <strong>WhatsApp API</strong>.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <div class="ep-hero ep-post">
+            <span class="method-tag method-post">POST</span>
+            <span class="ep-path">/bookings</span>
+          </div>
+          <div class="ep-hero ep-get">
+            <span class="method-tag method-get">GET</span>
+            <span class="ep-path">/my-bookings</span>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button onclick="showSimulator()" class="btn-sim">
+            <span class="btn-sim-icon"><i class="bi bi-play-circle-fill"></i></span>
+            <span class="btn-sim-text">Abrir Simulador del Microservicio</span>
+            <span class="btn-sim-arrow"><i class="bi bi-arrow-right"></i></span>
+          </button>
+        </div>
+
+        <div class="stats-strip mt-4 d-flex align-items-center">
+          <div class="stat-box">
+            <div class="stat-num">2</div>
+            <div class="stat-label">Endpoints</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-box">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Tecnologías</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-box">
+            <div class="stat-num">5</div>
+            <div class="stat-label">Módulos</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat-box">
+            <div class="stat-num online-num">●</div>
+            <div class="stat-label">Online</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ARCH -->
+      <div class="col-lg-6 d-flex justify-content-center reveal" style="animation-delay:.15s">
+        <div class="arch-card">
+          <div class="arch-card-header">
+            <i class="bi bi-diagram-3-fill"></i> Diagrama de Arquitectura
+          </div>
+          <div class="arch-card-body d-flex flex-column align-items-center gap-2">
+            <div class="anode anode-client">
+              <i class="bi bi-person-circle"></i> Cliente
+            </div>
+            <div class="arch-arr"><i class="bi bi-arrow-down-circle-fill"></i></div>
+            <div class="anode anode-service">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-box-seam-fill"></i>
+                <span>bookings-service</span>
+              </div>
+              <small>NestJS · Port 3002</small>
+            </div>
+            <div class="arch-split-line my-1"></div>
+            <div class="d-flex gap-4">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <div class="arch-arr small-arr"><i class="bi bi-arrow-down-circle-fill"></i></div>
+                <div class="anode anode-db">
+                  <i class="bi bi-database-fill"></i>
+                  <span>PostgreSQL</span>
+                  <small>bookings DB</small>
+                </div>
+              </div>
+              <div class="d-flex flex-column align-items-center gap-2">
+                <div class="arch-arr small-arr"><i class="bi bi-arrow-down-circle-fill"></i></div>
+                <div class="anode anode-wa">
+                  <i class="bi bi-whatsapp"></i>
+                  <span>WhatsApp</span>
+                  <small>Notificaciones</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FILA 1 CARDS ═══ -->
+<section class="content-section container-fluid px-4 px-lg-5">
+  <div class="row g-4">
+
+    <!-- RESPONSABILIDADES -->
+    <div class="col-lg-4 col-md-6">
+      <div class="bcard bcard-purple h-100 reveal">
+        <div class="bcard-top">
+          <div class="bcard-icon icon-purple"><i class="bi bi-check2-all"></i></div>
+          <div>
+            <div class="bcard-title">Responsabilidades</div>
+            <div class="bcard-sub">5 funciones clave</div>
+          </div>
+          <span class="ms-auto corner-badge cb-purple">Core</span>
+        </div>
+        <ul class="resp-list mt-3">
+          <li><span class="rdot rdot-purple"></span>Gestión de solicitudes de reserva</li>
+          <li><span class="rdot rdot-blue"></span>Publicación de disponibilidad</li>
+          <li><span class="rdot rdot-cyan"></span>Asignación de técnicos</li>
+          <li><span class="rdot rdot-green"></span>Contacto vía WhatsApp</li>
+          <li><span class="rdot rdot-orange"></span>Consulta de reservas del usuario</li>
+        </ul>
+        <div class="card-glow cglow-purple"></div>
+      </div>
+    </div>
+
+    <!-- ENDPOINTS -->
+    <div class="col-lg-4 col-md-6">
+      <div class="bcard bcard-blue h-100 reveal" style="animation-delay:.1s">
+        <div class="bcard-top">
+          <div class="bcard-icon icon-blue"><i class="bi bi-signpost-split-fill"></i></div>
+          <div>
+            <div class="bcard-title">API Endpoints</div>
+            <div class="bcard-sub">REST · JSON</div>
+          </div>
+          <span class="ms-auto corner-badge cb-blue">2 rutas</span>
+        </div>
+        <div class="ep-block ep-block-post mt-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="method-tag method-post">POST</span>
+            <code class="ep-code">/bookings</code>
+          </div>
+          <p class="ep-desc">Crea una nueva solicitud de reserva en el sistema.</p>
+          <div class="ep-tag-row">
+            <span class="ep-tag">Body: JSON</span>
+            <span class="ep-tag">Auth: JWT</span>
+            <span class="ep-tag success-tag">201 Created</span>
+          </div>
+        </div>
+        <div class="ep-block ep-block-get mt-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="method-tag method-get">GET</span>
+            <code class="ep-code">/my-bookings</code>
+          </div>
+          <p class="ep-desc">Devuelve todas las reservas del usuario autenticado.</p>
+          <div class="ep-tag-row">
+            <span class="ep-tag">Query: ?status</span>
+            <span class="ep-tag">Auth: JWT</span>
+            <span class="ep-tag success-tag">200 OK</span>
+          </div>
+        </div>
+        <div class="card-glow cglow-blue"></div>
+      </div>
+    </div>
+
+    <!-- STACK -->
+    <div class="col-lg-4 col-md-12">
+      <div class="bcard bcard-teal h-100 reveal" style="animation-delay:.2s">
+        <div class="bcard-top">
+          <div class="bcard-icon icon-teal"><i class="bi bi-layers-fill"></i></div>
+          <div>
+            <div class="bcard-title">Stack Tecnológico</div>
+            <div class="bcard-sub">3 tecnologías</div>
+          </div>
+          <span class="ms-auto corner-badge cb-teal">Prod</span>
+        </div>
+        <div class="sk-item mt-3">
+          <div class="sk-icon sk-nest"><i class="bi bi-cpu-fill"></i></div>
+          <div class="sk-text">
+            <div class="sk-name">NestJS</div>
+            <div class="sk-desc">Framework principal · Node.js</div>
+          </div>
+          <div class="sk-progress ms-auto">
+            <div class="sk-bar"><div class="sk-fill sf-nest" data-width="90%"></div></div>
+            <span class="sk-pct">90%</span>
+          </div>
+        </div>
+        <div class="sk-item">
+          <div class="sk-icon sk-pg"><i class="bi bi-database-fill-gear"></i></div>
+          <div class="sk-text">
+            <div class="sk-name">PostgreSQL</div>
+            <div class="sk-desc">Base de datos relacional</div>
+          </div>
+          <div class="sk-progress ms-auto">
+            <div class="sk-bar"><div class="sk-fill sf-pg" data-width="80%"></div></div>
+            <span class="sk-pct">80%</span>
+          </div>
+        </div>
+        <div class="sk-item">
+          <div class="sk-icon sk-wa"><i class="bi bi-whatsapp"></i></div>
+          <div class="sk-text">
+            <div class="sk-name">WhatsApp API</div>
+            <div class="sk-desc">Notificaciones · Contacto</div>
+          </div>
+          <div class="sk-progress ms-auto">
+            <div class="sk-bar"><div class="sk-fill sf-wa" data-width="70%"></div></div>
+            <span class="sk-pct">70%</span>
+          </div>
+        </div>
+        <div class="card-glow cglow-teal"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FILA 2 CARDS ═══ -->
+<section class="content-section container-fluid px-4 px-lg-5 pb-5">
+  <div class="row g-4">
+
+    <!-- FOLDER TREE -->
+    <div class="col-lg-6">
+      <div class="bcard bcard-orange h-100 reveal" style="animation-delay:.1s">
+        <div class="bcard-top">
+          <div class="bcard-icon icon-orange"><i class="bi bi-folder2-open"></i></div>
+          <div>
+            <div class="bcard-title">Estructura de Carpetas</div>
+            <div class="bcard-sub">Organización modular</div>
+          </div>
+          <div class="ms-auto d-flex gap-1">
+            <span class="lang-pill lp-ts">TS</span>
+            <span class="lang-pill lp-html">HTML</span>
+            <span class="lang-pill lp-css">CSS</span>
+            <span class="lang-pill lp-js">JS</span>
+          </div>
+        </div>
+        <div class="ftree mt-3">
+          <div class="frow f-root"><i class="bi bi-folder-fill fi fi-root"></i><span class="fn fn-root">bookings-service/</span></div>
+          <div class="frow f-l1"><i class="bi bi-folder-fill fi fi-src"></i><span class="fn">src/</span><span class="fbadge fb-ts">TypeScript</span></div>
+          <div class="frow f-l2"><i class="bi bi-folder-fill fi fi-ctrl"></i><span class="fn">controllers/</span></div>
+          <div class="frow f-l3"><i class="bi bi-file-earmark-code fi fi-ts"></i><span class="fn fn-file">bookings.controller.ts</span><span class="fbadge fb-ts">TS</span></div>
+          <div class="frow f-l2"><i class="bi bi-folder-fill fi fi-svc"></i><span class="fn">services/</span></div>
+          <div class="frow f-l3"><i class="bi bi-file-earmark-code fi fi-ts"></i><span class="fn fn-file">bookings.service.ts</span><span class="fbadge fb-ts">TS</span></div>
+          <div class="frow f-l2"><i class="bi bi-folder-fill fi fi-dto"></i><span class="fn">dto/</span></div>
+          <div class="frow f-l3"><i class="bi bi-file-earmark-code fi fi-ts"></i><span class="fn fn-file">create-booking.dto.ts</span><span class="fbadge fb-ts">TS</span></div>
+          <div class="frow f-l2"><i class="bi bi-folder-fill fi fi-ent"></i><span class="fn">entities/</span></div>
+          <div class="frow f-l3"><i class="bi bi-file-earmark-text fi fi-ts"></i><span class="fn fn-file">booking.entity.ts</span><span class="fbadge fb-ts">TS</span></div>
+          <div class="frow f-l2"><i class="bi bi-folder-fill fi fi-wa"></i><span class="fn">whatsapp/</span><span class="fbadge fb-wa">WhatsApp</span></div>
+          <div class="frow f-l3"><i class="bi bi-file-earmark-code fi fi-ts"></i><span class="fn fn-file">whatsapp.service.ts</span><span class="fbadge fb-ts">TS</span></div>
+          <div class="frow f-l1"><i class="bi bi-folder-fill fi fi-html"></i><span class="fn">html/</span><span class="fbadge fb-html">HTML</span></div>
+          <div class="frow f-l2"><i class="bi bi-filetype-html fi fi-html-f"></i><span class="fn fn-file">index.html</span></div>
+          <div class="frow f-l1"><i class="bi bi-folder-fill fi fi-css"></i><span class="fn">css/</span><span class="fbadge fb-css">CSS</span></div>
+          <div class="frow f-l2"><i class="bi bi-filetype-css fi fi-css-f"></i><span class="fn fn-file">styles.css</span></div>
+          <div class="frow f-l1"><i class="bi bi-folder-fill fi fi-js"></i><span class="fn">js/</span><span class="fbadge fb-js">JS</span></div>
+          <div class="frow f-l2"><i class="bi bi-filetype-js fi fi-js-f"></i><span class="fn fn-file">main.js</span></div>
+          <div class="frow f-l1"><i class="bi bi-file-earmark-code fi fi-json"></i><span class="fn fn-file">package.json</span><span class="fbadge fb-json">JSON</span></div>
+          <div class="frow f-l1"><i class="bi bi-file-earmark-code fi fi-json"></i><span class="fn fn-file">tsconfig.json</span><span class="fbadge fb-json">JSON</span></div>
+        </div>
+        <div class="card-glow cglow-orange"></div>
+      </div>
+    </div>
+
+    <!-- FLUJO -->
+    <div class="col-lg-6">
+      <div class="bcard bcard-pink h-100 reveal" style="animation-delay:.2s">
+        <div class="bcard-top">
+          <div class="bcard-icon icon-pink"><i class="bi bi-arrow-repeat"></i></div>
+          <div>
+            <div class="bcard-title">Flujo de Reserva</div>
+            <div class="bcard-sub">5 pasos del ciclo de vida</div>
+          </div>
+          <span class="ms-auto corner-badge cb-pink">End-to-end</span>
+        </div>
+        <div class="flow-timeline mt-4">
+          <div class="ft-item">
+            <div class="ft-left"><div class="ft-num fn-1">01</div><div class="ft-connector"></div></div>
+            <div class="ft-content">
+              <div class="ft-title">Cliente envía solicitud</div>
+              <div class="ft-desc"><code>POST /bookings</code> con datos del servicio</div>
+              <div class="ft-chips"><span class="ft-chip chip-post">POST</span><span class="ft-chip chip-neutral">HTTP 201</span></div>
+            </div>
+          </div>
+          <div class="ft-item">
+            <div class="ft-left"><div class="ft-num fn-2">02</div><div class="ft-connector"></div></div>
+            <div class="ft-content">
+              <div class="ft-title">Registro en PostgreSQL</div>
+              <div class="ft-desc">Se persiste en la tabla <code>bookings</code></div>
+              <div class="ft-chips"><span class="ft-chip chip-db">PostgreSQL</span><span class="ft-chip chip-neutral">TypeORM</span></div>
+            </div>
+          </div>
+          <div class="ft-item">
+            <div class="ft-left"><div class="ft-num fn-3">03</div><div class="ft-connector"></div></div>
+            <div class="ft-content">
+              <div class="ft-title">Asignación de técnico</div>
+              <div class="ft-desc">Técnico disponible asignado por zona</div>
+              <div class="ft-chips"><span class="ft-chip chip-svc">Service</span><span class="ft-chip chip-neutral">Algoritmo</span></div>
+            </div>
+          </div>
+          <div class="ft-item">
+            <div class="ft-left"><div class="ft-num fn-4">04</div><div class="ft-connector"></div></div>
+            <div class="ft-content">
+              <div class="ft-title">Notificación WhatsApp</div>
+              <div class="ft-desc">Confirmación al cliente y técnico asignado</div>
+              <div class="ft-chips"><span class="ft-chip chip-wa">WhatsApp</span><span class="ft-chip chip-neutral">Webhook</span></div>
+            </div>
+          </div>
+          <div class="ft-item">
+            <div class="ft-left"><div class="ft-num fn-5">05</div></div>
+            <div class="ft-content">
+              <div class="ft-title">Consulta de reservas</div>
+              <div class="ft-desc"><code>GET /my-bookings</code> retorna historial</div>
+              <div class="ft-chips"><span class="ft-chip chip-get">GET</span><span class="ft-chip chip-neutral">HTTP 200</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-glow cglow-pink"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="site-footer text-center py-3">
+  <i class="bi bi-box-seam-fill me-2" style="color:var(--blue)"></i>
+  bookings-service · NestJS + PostgreSQL + WhatsApp API · Arquitectura de Microservicios
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════
+     SIMULATOR VIEW
+═══════════════════════════════════════════════════════ -->
+<div id="simulator-view">
+
+  <!-- SIM NAV -->
+  <nav class="sim-nav py-3">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn-back" onclick="hideSimulator()">
+        <i class="bi bi-arrow-left"></i> Volver al Mockup
+      </button>
+      <div class="nav-sep"></div>
+      <span class="sim-nav-title"><i class="bi bi-box-seam-fill me-2" style="color:var(--blue)"></i>bookings<span>-service</span> · Simulador</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="pulse-dot"></span>
+      <span style="font-size:.75rem;color:var(--green)">Simulando en tiempo real</span>
+    </div>
+  </nav>
+
+  <!-- STATS TOP -->
+  <section class="container-fluid px-4 px-lg-5 py-4">
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="sim-stat">
+          <div class="sim-stat-num" id="stat-total" style="color:var(--blue)">0</div>
+          <div class="sim-stat-label">Solicitudes Totales</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sim-stat">
+          <div class="sim-stat-num" id="stat-pending" style="color:var(--yellow)">0</div>
+          <div class="sim-stat-label">Pendientes</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sim-stat">
+          <div class="sim-stat-num" id="stat-assigned" style="color:var(--teal)">0</div>
+          <div class="sim-stat-label">Asignadas</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="sim-stat">
+          <div class="sim-stat-num" id="stat-done" style="color:var(--green)">0</div>
+          <div class="sim-stat-label">Completadas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="sim-tabs mb-4">
+      <button class="sim-tab active" onclick="switchTab('solicitudes',this)">
+        <i class="bi bi-plus-circle-fill"></i> Nueva Solicitud
+      </button>
+      <button class="sim-tab" onclick="switchTab('publicaciones',this)">
+        <i class="bi bi-megaphone-fill"></i> Publicaciones
+      </button>
+      <button class="sim-tab" onclick="switchTab('tecnicos',this)">
+        <i class="bi bi-person-badge-fill"></i> Técnicos
+      </button>
+      <button class="sim-tab" onclick="switchTab('reservas',this)">
+        <i class="bi bi-calendar2-check-fill"></i> Mis Reservas
+      </button>
+    </div>
+
+    <!-- ── PANEL: NUEVA SOLICITUD ── -->
+    <div id="panel-solicitudes" class="sim-panel active">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="sim-card">
+            <div class="sim-section-title"><i class="bi bi-send-fill"></i> Nueva Solicitud de Servicio</div>
+            <div class="sim-section-sub">POST /bookings · Completa los datos para crear una reserva</div>
+
+            <div class="mb-3">
+              <div class="sim-label">TIPO DE SERVICIO</div>
+              <select class="sim-select" id="f-tipo">
+                <option value="">-- Selecciona --</option>
+                <option value="Plomería">🔧 Plomería</option>
+                <option value="Electricidad">⚡ Electricidad</option>
+                <option value="Pintura">🎨 Pintura</option>
+                <option value="Carpintería">🪚 Carpintería</option>
+                <option value="Limpieza">🧹 Limpieza</option>
+                <option value="Gasfitería">🚿 Gasfitería</option>
+                <option value="Jardinería">🌿 Jardinería</option>
+              </select>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <div class="sim-label">NOMBRE DEL CLIENTE</div>
+                <input class="sim-input" id="f-cliente" type="text" placeholder="Ej: Juan Pérez"/>
+              </div>
+              <div class="col-6">
+                <div class="sim-label">TELÉFONO (WhatsApp)</div>
+                <input class="sim-input" id="f-telefono" type="text" placeholder="+591 7xxxxxxx"/>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="sim-label">DIRECCIÓN</div>
+              <input class="sim-input" id="f-direccion" type="text" placeholder="Ej: Av. 6 de Agosto, Zona Sur"/>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <div class="sim-label">FECHA PREFERIDA</div>
+                <input class="sim-input" id="f-fecha" type="date"/>
+              </div>
+              <div class="col-6">
+                <div class="sim-label">URGENCIA</div>
+                <select class="sim-select" id="f-urgencia">
+                  <option value="Normal">Normal</option>
+                  <option value="Urgente">🔴 Urgente</option>
+                  <option value="Programado">📅 Programado</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="sim-label">DESCRIPCIÓN DEL PROBLEMA</div>
+              <textarea class="sim-textarea" id="f-descripcion" placeholder="Describe el problema o servicio que necesitas..."></textarea>
+            </div>
+            <button class="btn-primary-sim w-100" onclick="crearSolicitud()">
+              <i class="bi bi-send-fill"></i> Enviar Solicitud · POST /bookings
+            </button>
+          </div>
+        </div>
+
+        <!-- RESPONSE PANEL -->
+        <div class="col-lg-7">
+          <div class="sim-card h-100">
+            <div class="sim-section-title"><i class="bi bi-terminal-fill"></i> Respuesta del Servidor</div>
+            <div class="sim-section-sub">Visualización de la respuesta JSON del microservicio</div>
+            <div id="response-box" style="
+              background:rgba(0,0,0,.4);border:1px solid var(--border);
+              border-radius:var(--radius-sm);padding:16px;
+              font-size:.76rem;color:var(--muted2);line-height:1.8;
+              min-height:200px;font-family:var(--mono);
+              overflow-y:auto;max-height:360px;
+            ">
+              <span style="color:var(--muted)">// Esperando solicitud...</span><br>
+              <span style="color:var(--muted)">// Completa el formulario y presiona "Enviar"</span>
+            </div>
+
+            <div class="mt-4">
+              <div class="sim-section-title" style="font-size:.9rem"><i class="bi bi-whatsapp" style="color:var(--wa)"></i> Notificación WhatsApp</div>
+              <div id="wa-box" style="
+                background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.2);
+                border-radius:var(--radius-sm);padding:14px;
+                font-size:.78rem;color:var(--muted2);
+                min-height:80px;
+              ">
+                <span style="color:var(--muted)">// Sin notificaciones aún</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: PUBLICACIONES ── -->
+    <div id="panel-publicaciones" class="sim-panel">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="sim-card">
+            <div class="sim-section-title"><i class="bi bi-megaphone-fill"></i> Publicar Servicio</div>
+            <div class="sim-section-sub">Un técnico publica su disponibilidad</div>
+            <div class="mb-3">
+              <div class="sim-label">TÉCNICO</div>
+              <select class="sim-select" id="pub-tecnico">
+                <option value="Carlos Mendoza">Carlos Mendoza — Plomero</option>
+                <option value="Ana Quispe">Ana Quispe — Electricista</option>
+                <option value="Luis Torres">Luis Torres — Pintor</option>
+                <option value="María Flores">María Flores — Carpintera</option>
+                <option value="Jorge Mamani">Jorge Mamani — Gasfitero</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <div class="sim-label">SERVICIO OFRECIDO</div>
+              <select class="sim-select" id="pub-servicio">
+                <option>🔧 Plomería</option>
+                <option>⚡ Electricidad</option>
+                <option>🎨 Pintura</option>
+                <option>🪚 Carpintería</option>
+                <option>🧹 Limpieza</option>
+                <option>🚿 Gasfitería</option>
+                <option>🌿 Jardinería</option>
+              </select>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <div class="sim-label">PRECIO / HORA</div>
+                <input class="sim-input" id="pub-precio" type="number" placeholder="Bs. 80"/>
+              </div>
+              <div class="col-6">
+                <div class="sim-label">ZONA</div>
+                <select class="sim-select" id="pub-zona">
+                  <option>Zona Sur</option>
+                  <option>Zona Norte</option>
+                  <option>Centro</option>
+                  <option>Miraflores</option>
+                  <option>Sopocachi</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="sim-label">DESCRIPCIÓN</div>
+              <textarea class="sim-textarea" id="pub-desc" placeholder="Años de experiencia, especialidad..."></textarea>
+            </div>
+            <button class="btn-primary-sim w-100" onclick="publicarServicio()">
+              <i class="bi bi-megaphone-fill"></i> Publicar Disponibilidad
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="sim-section-title mb-3" style="font-size:.9rem;color:var(--muted2)">
+            <i class="bi bi-grid-fill" style="color:var(--orange)"></i> Servicios Publicados
+          </div>
+          <div id="publicaciones-list" class="row g-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: TÉCNICOS ── -->
+    <div id="panel-tecnicos" class="sim-panel">
+      <div class="sim-section-title mb-1"><i class="bi bi-person-badge-fill"></i> Técnicos Disponibles</div>
+      <div class="sim-section-sub mb-4">Asigna un técnico a una solicitud pendiente</div>
+
+      <div class="row g-3 mb-4" id="tecnicos-list"></div>
+
+      <div class="sim-card mt-2">
+        <div class="sim-section-title" style="font-size:.9rem"><i class="bi bi-link-45deg" style="color:var(--purple)"></i> Asignar Técnico a Solicitud</div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-5">
+            <div class="sim-label">SOLICITUD PENDIENTE</div>
+            <select class="sim-select" id="asign-booking"></select>
+          </div>
+          <div class="col-md-5">
+            <div class="sim-label">TÉCNICO A ASIGNAR</div>
+            <select class="sim-select" id="asign-tecnico">
+              <option>Carlos Mendoza</option>
+              <option>Ana Quispe</option>
+              <option>Luis Torres</option>
+              <option>María Flores</option>
+              <option>Jorge Mamani</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn-success-sim w-100" onclick="asignarTecnico()">
+              <i class="bi bi-check2"></i> Asignar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL: MIS RESERVAS ── -->
+    <div id="panel-reservas" class="sim-panel">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <div class="sim-section-title"><i class="bi bi-calendar2-check-fill"></i> Mis Reservas</div>
+          <div class="sim-section-sub">GET /my-bookings · Historial completo del usuario</div>
+        </div>
+        <div class="d-flex gap-2">
+          <select class="sim-select" id="filter-status" onchange="renderReservas()" style="width:auto;padding:7px 12px;">
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="assigned">Asignadas</option>
+            <option value="done">Completadas</option>
+          </select>
+          <button class="btn-danger-sim" onclick="limpiarTodo()">
+            <i class="bi bi-trash3-fill"></i> Limpiar
+          </button>
+        </div>
+      </div>
+      <div id="reservas-list" class="row g-3"></div>
+      <div id="reservas-empty" class="text-center py-5" style="color:var(--muted);display:none">
+        <i class="bi bi-inbox" style="font-size:2.5rem;display:block;margin-bottom:12px"></i>
+        No hay reservas registradas aún.<br>
+        <small>Crea una solicitud desde la pestaña "Nueva Solicitud"</small>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- TOAST -->
+<div class="sim-toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <span id="toast-msg">Mensaje</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── PARTICLES ──────────────────────────────────────
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+const COLORS = ['#60a5fa','#a78bfa','#22d3ee','#f472b6','#4ade80','#fbbf24','#fb923c'];
+
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();
+window.addEventListener('resize',resize);
+
+const particles=[];
+for(let i=0;i<60;i++){
+  particles.push({
+    x:Math.random()*window.innerWidth,
+    y:Math.random()*window.innerHeight,
+    r:Math.random()*1.8+0.4,
+    dx:(Math.random()-.5)*.45,
+    dy:(Math.random()-.5)*.45,
+    color:COLORS[Math.floor(Math.random()*COLORS.length)],
+    alpha:Math.random()*.5+.15
+  });
+}
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color;
+    ctx.globalAlpha=p.alpha;
+    ctx.fill();
+    p.x+=p.dx; p.y+=p.dy;
+    if(p.x<0||p.x>canvas.width)p.dx*=-1;
+    if(p.y<0||p.y>canvas.height)p.dy*=-1;
+  });
+  ctx.globalAlpha=1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ── REVEAL ON SCROLL ──────────────────────────────
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.style.animationPlayState='running';});
+},{threshold:.1});
+reveals.forEach(el=>{el.style.animationPlayState='paused';obs.observe(el);});
+
+// ── PROGRESS BARS ─────────────────────────────────
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.sk-fill').forEach(f=>{
+    const w=f.dataset.width||'0%';
+    f.style.width='0';
+    setTimeout(()=>{f.style.width=w;},600);
+  });
+});
+
+// ── FOLDER HOVER ──────────────────────────────────
+document.querySelectorAll('.frow').forEach(row=>{
+  row.addEventListener('mouseenter',()=>row.style.paddingLeft=
+    (parseInt(getComputedStyle(row).paddingLeft)+6)+'px');
+  row.addEventListener('mouseleave',()=>row.style.paddingLeft='');
+});
+
+// ══════════════════════════════════════════════════
+//  SIMULATOR LOGIC
+// ══════════════════════════════════════════════════
+
+let bookings = [];
+let publications = [];
+let bookingCounter = 1000;
+
+// ── NAV ──
+function showSimulator(){
+  document.getElementById('simulator-view').style.display='block';
+  document.getElementById('simulator-view').scrollTop=0;
+  renderTecnicos();
+  renderReservas();
+  renderPublicaciones();
+  updateStats();
+}
+function hideSimulator(){
+  document.getElementById('simulator-view').style.display='none';
+}
+
+// ── TABS ──
+function switchTab(name, btn){
+  document.querySelectorAll('.sim-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sim-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='tecnicos') renderTecnicos();
+  if(name==='reservas') renderReservas();
+  if(name==='publicaciones') renderPublicaciones();
+}
+
+// ── TOAST ──
+function showToast(msg, icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ── STATS ──
+function updateStats(){
+  document.getElementById('stat-total').textContent=bookings.length;
+  document.getElementById('stat-pending').textContent=bookings.filter(b=>b.status==='pending').length;
+  document.getElementById('stat-assigned').textContent=bookings.filter(b=>b.status==='assigned').length;
+  document.getElementById('stat-done').textContent=bookings.filter(b=>b.status==='done').length;
+}
+
+// ── CREAR SOLICITUD ──
+function crearSolicitud(){
+  const tipo=document.getElementById('f-tipo').value;
+  const cliente=document.getElementById('f-cliente').value.trim();
+  const tel=document.getElementById('f-telefono').value.trim();
+  const dir=document.getElementById('f-direccion').value.trim();
+  const fecha=document.getElementById('f-fecha').value;
+  const urgencia=document.getElementById('f-urgencia').value;
+  const desc=document.getElementById('f-descripcion').value.trim();
+
+  if(!tipo||!cliente||!tel||!dir){
+    showToast('Completa los campos obligatorios','⚠️'); return;
+  }
+
+  const id='BK-'+( ++bookingCounter );
+  const now=new Date().toISOString();
+  const booking={
+    id, tipo, cliente, telefono:tel,
+    direccion:dir, fecha:fecha||'Sin fecha',
+    urgencia, descripcion:desc||'Sin descripción',
+    status:'pending', tecnico:null,
+    createdAt:now
+  };
+  bookings.push(booking);
+  updateStats();
+  updateAsignSelect();
+
+  // Response JSON
+  const json=JSON.stringify({
+    status:201,message:'Booking created successfully',
+    data:{
+      booking_id:id,
+      service_type:tipo,
+      client:cliente,
+      phone:tel,
+      address:dir,
+      scheduled_date:fecha||'TBD',
+      urgency:urgencia,
+      status:'pending',
+      assigned_technician:null,
+      created_at:now
+    }
+  },null,2);
+
+  document.getElementById('response-box').innerHTML=
+    syntaxHL(json);
+
+  // WhatsApp sim
+  document.getElementById('wa-box').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="color:var(--wa);font-size:1rem"><i class="bi bi-whatsapp"></i></span>
+      <strong style="color:var(--wa)">WhatsApp enviado a ${tel}</strong>
+    </div>
+    <div style="background:rgba(37,211,102,.08);border-radius:8px;padding:10px;font-size:.78rem;color:var(--muted2)">
+      ✅ *Reserva Confirmada - ${id}*<br>
+      Hola ${cliente}, tu solicitud de <strong>${tipo}</strong> fue recibida.<br>
+      📍 Dirección: ${dir}<br>
+      📅 Fecha: ${fecha||'A coordinar'}<br>
+      🔔 Estado: <em>Pendiente de asignación</em><br><br>
+      <span style="color:var(--muted)">bookings-service · ${new Date().toLocaleTimeString()}</span>
+    </div>`;
+
+  showToast(`Solicitud ${id} creada exitosamente`,'🎉');
+
+  // clear form
+  ['f-tipo','f-cliente','f-telefono','f-direccion','f-fecha','f-descripcion'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+}
+
+// ── PUBLICAR SERVICIO ──
+function publicarServicio(){
+  const tecnico=document.getElementById('pub-tecnico').value;
+  const servicio=document.getElementById('pub-servicio').value;
+  const precio=document.getElementById('pub-precio').value||'80';
+  const zona=document.getElementById('pub-zona').value;
+  const desc=document.getElementById('pub-desc').value||'Servicio profesional de calidad';
+
+  publications.push({tecnico,servicio,precio,zona,desc,id:'PUB-'+Date.now()});
+  renderPublicaciones();
+  document.getElementById('pub-precio').value='';
+  document.getElementById('pub-desc').value='';
+  showToast(`${tecnico} publicó: ${servicio}`,'📣');
+}
+
+function renderPublicaciones(){
+  const el=document.getElementById('publicaciones-list');
+  if(!el) return;
+  if(!publications.length){
+    el.innerHTML=`<div class="col-12 text-center py-4" style="color:var(--muted)">
+      <i class="bi bi-megaphone" style="font-size:2rem;display:block;margin-bottom:8px"></i>
+      No hay publicaciones aún. ¡Agrega la primera!
+    </div>`;
+    return;
+  }
+  const serviceEmojis={'🔧 Plomería':'🔧','⚡ Electricidad':'⚡','🎨 Pintura':'🎨','🪚 Carpintería':'🪚','🧹 Limpieza':'🧹','🚿 Gasfitería':'🚿','🌿 Jardinería':'🌿'};
+  el.innerHTML=publications.map(p=>`
+    <div class="col-md-6">
+      <div class="sim-card" style="border-color:var(--border2)">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue-d),var(--purple-d));display:flex;align-items:center;justify-content:center;font-size:1.1rem">
+            ${serviceEmojis[p.servicio]||'🔨'}
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--text)">${p.servicio}</div>
+            <div style="font-size:.72rem;color:var(--muted2)">${p.tecnico}</div>
+          </div>
+          <div class="ms-auto">
+            <span class="bk-status status-assigned">Activo</span>
+          </div>
+        </div>
+        <div class="bk-divider"></div>
+        <div class="d-flex gap-3" style="font-size:.74rem;color:var(--muted2)">
+          <span><i class="bi bi-geo-alt-fill" style="color:var(--orange)"></i> ${p.zona}</span>
+          <span><i class="bi bi-currency-dollar" style="color:var(--green)"></i> Bs.${p.precio}/hr</span>
+        </div>
+        <div style="font-size:.74rem;color:var(--muted);margin-top:8px">${p.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── TÉCNICOS ──
+const TECNICOS=[
+  {nombre:'Carlos Mendoza',especialidad:'Plomero',zona:'Zona Sur',rating:4.8,disponible:true,color:'#3b82f6',avatar:'CM',skills:['Tuberías','Grifo','Desagüe']},
+  {nombre:'Ana Quispe',especialidad:'Electricista',zona:'Centro',rating:4.9,disponible:true,color:'#f59e0b',avatar:'AQ',skills:['Instalaciones','Corto circuito','Tomacorrientes']},
+  {nombre:'Luis Torres',especialidad:'Pintor',zona:'Miraflores',rating:4.5,disponible:false,color:'#8b5cf6',avatar:'LT',skills:['Interior','Exterior','Decorativo']},
+  {nombre:'María Flores',especialidad:'Carpintera',zona:'Zona Norte',rating:4.7,disponible:true,color:'#10b981',avatar:'MF',skills:['Muebles','Puertas','Reparación']},
+  {nombre:'Jorge Mamani',especialidad:'Gasfitero',zona:'Sopocachi',rating:4.6,disponible:false,color:'#ef4444',avatar:'JM',skills:['Gas natural','Calefón','Duchas']},
+];
+
+function renderTecnicos(){
+  const el=document.getElementById('tecnicos-list');
+  if(!el) return;
+  el.innerHTML=TECNICOS.map(t=>`
+    <div class="col-md-6 col-lg-4">
+      <div class="tech-card">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="tech-avatar" style="background:${t.color}22;color:${t.color}">${t.avatar}</div>
+          <div>
+            <div class="tech-name">${t.nombre}</div>
+            <div class="tech-spec">${t.especialidad} · ${t.zona}</div>
+            <div class="tech-rating">⭐ ${t.rating} · <span class="avail-dot ${t.disponible?'avail-yes':'avail-busy'}"></span> ${t.disponible?'<span style="color:var(--green)">Disponible</span>':'<span style="color:var(--yellow)">Ocupado</span>'}</div>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-1">
+          ${t.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── ASIGNAR TÉCNICO ──
+function updateAsignSelect(){
+  const sel=document.getElementById('asign-booking');
+  if(!sel) return;
+  const pending=bookings.filter(b=>b.status==='pending');
+  sel.innerHTML=pending.length
+    ? pending.map(b=>`<option value="${b.id}">${b.id} — ${b.tipo} (${b.cliente})</option>`).join('')
+    : '<option>Sin solicitudes pendientes</option>';
+}
+
+function asignarTecnico(){
+  const bookingId=document.getElementById('asign-booking').value;
+  const tecnico=document.getElementById('asign-tecnico').value;
+  const bk=bookings.find(b=>b.id===bookingId);
+  if(!bk||bk.status!=='pending'){showToast('No hay solicitudes pendientes para asignar','⚠️');return;}
+  bk.status='assigned';
+  bk.tecnico=tecnico;
+  updateStats();
+  updateAsignSelect();
+  showToast(`${tecnico} asignado a ${bookingId}`,'🔧');
+  renderReservas();
+}
+
+// ── RESERVAS ──
+function renderReservas(){
+  const el=document.getElementById('reservas-list');
+  const empty=document.getElementById('reservas-empty');
+  if(!el) return;
+  const filter=document.getElementById('filter-status')?.value||'';
+  const list=filter?bookings.filter(b=>b.status===filter):bookings;
+  if(!list.length){
+    el.innerHTML=''; empty.style.display='block'; return;
+  }
+  empty.style.display='none';
+  const statusLabel={pending:'Pendiente',assigned:'Asignada',done:'Completada',cancelled:'Cancelada'};
+  const statusClass={pending:'status-pending',assigned:'status-assigned',done:'status-done',cancelled:'status-cancelled'};
+  el.innerHTML=list.map(b=>`
+    <div class="col-md-6 col-lg-4">
+      <div class="booking-card">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="bk-id">${b.id}</span>
+          <span class="bk-status ${statusClass[b.status]}">${statusLabel[b.status]}</span>
+        </div>
+        <div class="bk-title">${b.tipo}</div>
+        <div class="bk-meta">
+          <div><i class="bi bi-person-fill" style="color:var(--blue)"></i> ${b.cliente}</div>
+          <div><i class="bi bi-geo-alt-fill" style="color:var(--orange)"></i> ${b.direccion}</div>
+          <div><i class="bi bi-calendar-fill" style="color:var(--purple)"></i> ${b.fecha}</div>
+          ${b.tecnico?`<div><i class="bi bi-person-badge-fill" style="color:var(--teal)"></i> ${b.tecnico}</div>`:''}
+        </div>
+        <div class="bk-divider"></div>
+        <div style="font-size:.72rem;color:var(--muted)">${b.descripcion}</div>
+        <div class="d-flex gap-2 mt-3">
+          ${b.status==='assigned'?`<button class="btn-success-sim" style="padding:5px 12px;font-size:.72rem" onclick="completarReserva('${b.id}')"><i class="bi bi-check2-all"></i> Completar</button>`:''}
+          ${b.status==='pending'||b.status==='assigned'?`<button class="btn-danger-sim" style="padding:5px 12px;font-size:.72rem" onclick="cancelarReserva('${b.id}')"><i class="bi bi-x-lg"></i> Cancelar</button>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function completarReserva(id){
+  const b=bookings.find(x=>x.id===id);
+  if(b){b.status='done';updateStats();renderReservas();showToast(`${id} marcada como completada`,'✅');}
+}
+function cancelarReserva(id){
+  const b=bookings.find(x=>x.id===id);
+  if(b){b.status='cancelled';updateStats();renderReservas();showToast(`${id} cancelada`,'❌');}
+}
+function limpiarTodo(){
+  bookings=[];updateStats();renderReservas();updateAsignSelect();showToast('Reservas limpiadas','🗑️');
+}
+
+// ── SYNTAX HIGHLIGHT ──
+function syntaxHL(json){
+  return json
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match=>{
+      let cls='color:var(--orange)';
+      if(/^"/.test(match)){cls=/:$/.test(match)?'color:var(--blue)':'color:var(--green)';}
+      else if(/true|false/.test(match)){cls='color:var(--purple)';}
+      else if(/null/.test(match)){cls='color:var(--red)';}
+      return `<span style="${cls}">${match}</span>`;
+    });
+}
+</script>
+</body>
+</html>
