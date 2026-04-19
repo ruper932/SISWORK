@@ -1,0 +1,100 @@
+import { Router, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+// Parche para que Express pueda enviar los IDs de tipo "BigInt" al frontend sin fallar
+(BigInt.prototype as any).toJSON = function () { return this.toString(); };
+
+dotenv.config();
+
+const router = Router();
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL
+});
+
+// ==========================================
+// VISTA 1: CREAR NUEVA SOLICITUD (El Formulario)
+// ==========================================
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const datosFormulario = req.body;
+
+    // Usamos el nombre real de tu tabla: publicaciones
+    const nuevaSolicitud = await prisma.publicaciones.create({
+      data: {
+        // En tu BD es obligatorio enviar un código de solicitud
+        codigo_solicitud: `SOL-${Date.now()}`, 
+        cliente_id: 1, // Por ahora quemamos el ID 1 hasta que tengas el login
+        categoria_servicio_id: 1, // Por ahora quemamos la categoría 1
+        titulo: datosFormulario.titulo,
+        descripcion: datosFormulario.descripcion,
+        direccion: datosFormulario.direccion,
+        referencia: datosFormulario.referencia,
+        // Adaptado a los nombres reales de tus columnas
+        fecha_requerida: new Date(datosFormulario.fechaRequerida),
+        presupuesto_estimado: datosFormulario.presupuesto,
+        estado: 'Publicada', 
+      }
+    });
+
+    res.status(201).json({ 
+      mensaje: "¡Solicitud creada exitosamente!", 
+      solicitud: nuevaSolicitud 
+    });
+  } catch (error) {
+    console.log(error); // Para que puedas ver el error real en la terminal si algo falla
+    res.status(500).json({ error: "Error al guardar la solicitud" });
+  }
+});
+
+// ==========================================
+// VISTA 2: VER DETALLE (Pantalla de Éxito)
+// ==========================================
+router.get('/:id_solicitud', async (req: Request, res: Response) => {
+  try {
+    const id = BigInt(req.params.id_solicitud);
+    
+    const solicitud = await prisma.publicaciones.findUnique({
+      where: { id: id },
+      include: {
+        // Tu relación se llama categorias_servicio en la BD
+        categorias_servicio: true 
+      }
+    });
+
+    res.json(solicitud);
+  } catch (error) {
+    res.status(500).json({ error: "No se encontró la solicitud" });
+  }
+});
+
+// ==========================================
+// VISTA 3: DASHBOARD Y TABLA DE MIS SOLICITUDES
+// ==========================================
+router.get('/mis-solicitudes/:id_cliente', async (req: Request, res: Response) => {
+  try {
+    const idCliente = BigInt(req.params.id_cliente);
+
+    const listaSolicitudes = await prisma.publicaciones.findMany({
+      where: { cliente_id: idCliente },
+      orderBy: { created_at: 'desc' }, // En tu BD se llama created_at
+      include: { categorias_servicio: true }
+    });
+
+    const conteo = await prisma.publicaciones.groupBy({
+      by: ['estado'],
+      where: { cliente_id: idCliente },
+      _count: { estado: true }
+    });
+
+    res.json({
+      lista: listaSolicitudes,
+      estadisticas: conteo
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: "Error al cargar el dashboard" });
+  }
+});
+
+export default router;
