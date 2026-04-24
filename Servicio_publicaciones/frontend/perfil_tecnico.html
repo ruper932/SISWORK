@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Profesional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .perfil-header { background-color: #0d6efd; color: white; padding: 2rem 0; border-radius: 0 0 1rem 1rem; }
+        .card { border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <div class="perfil-header text-center mb-4">
+        <div class="container">
+            <img src="https://ui-avatars.com/api/?name=Tecnico+Experto&size=120&rounded=true" alt="Foto de perfil" class="mb-3 border border-3 border-white">
+            <h2 id="nombreTecnico">Cargando nombre...</h2>
+            <p class="lead" id="especialidadPrincipal"><i class="bi bi-tools"></i> Especialidad</p>
+            <div>
+                <span class="badge bg-warning text-dark fs-6"><i class="bi bi-star-fill"></i> <span id="promedioValoracion">0.0</span>/5</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-clock-history"></i> Disponibilidad</h5>
+                        <hr>
+                        <ul class="list-group list-group-flush" id="listaDisponibilidad">
+                            <li class="list-group-item text-muted">Cargando horarios...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-award"></i> Certificaciones</h5>
+                        <hr>
+                        <ul class="list-group list-group-flush" id="listaCertificaciones">
+                            <li class="list-group-item text-muted">Cargando documentos...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0"><i class="bi bi-chat-left-text"></i> Reseñas de Clientes</h5>
+                            <button class="btn btn-outline-primary btn-sm" disabled>Dejar reseña</button>
+                        </div>
+                        <hr>
+                        <div id="contenedorValoraciones">
+                            <div class="text-center text-muted p-3">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2">Cargando reseñas reales desde el servidor...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // La dirección de tu servidor local
+        const API_URL = 'http://localhost:3000';
+        
+        // Simulamos que estamos viendo el perfil del técnico con ID '1'
+        const TECNICO_ID = '1'; 
+
+        async function cargarPerfil() {
+            try {
+                // 1. Datos básicos estáticos (En producción esto vendría de tu tabla de Usuarios)
+                document.getElementById('nombreTecnico').textContent = 'Juan Pérez';
+                document.getElementById('especialidadPrincipal').innerHTML = '<i class="bi bi-tools"></i> Electricista Residencial';
+                document.getElementById('promedioValoracion').textContent = '4.5';
+
+                // 2. INTEGRACIÓN REAL: Cargar Disponibilidad desde TU Backend
+                const resDisp = await fetch(`${API_URL}/disponibilidad/tecnico/${TECNICO_ID}`);
+                const disponibilidades = await resDisp.json();
+                
+                const listaDisp = document.getElementById('listaDisponibilidad');
+                listaDisp.innerHTML = ''; // Limpiamos el texto de "Cargando..."
+                
+                if (disponibilidades && disponibilidades.length > 0) {
+                    disponibilidades.forEach(d => {
+                        listaDisp.innerHTML += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${d.diaSemana}
+                            <span class="badge bg-primary rounded-pill">${d.horaInicio} - ${d.horaFin}</span>
+                        </li>`;
+                    });
+                } else {
+                    listaDisp.innerHTML = '<li class="list-group-item text-muted">No hay horarios registrados en la base de datos.</li>';
+                }
+
+                // 3. INTEGRACIÓN VISUAL: Cargar Valoraciones
+                // Como recién armamos la base de datos de valoraciones, pondremos datos de prueba
+                // para que veas cómo el DOM dibuja las estrellas dinámicamente.
+                const contenedorVal = document.getElementById('contenedorValoraciones');
+                const valoracionesPrueba = [
+                    { nombre: 'María López', puntos: 5, comentario: 'Excelente trabajo, muy puntual y limpio.' },
+                    { nombre: 'Carlos Ruiz', puntos: 4, comentario: 'Buen servicio, resolvió el cortocircuito rápido.' }
+                ];
+
+                contenedorVal.innerHTML = '';
+                valoracionesPrueba.forEach(val => {
+                    let estrellasHTML = '';
+                    for(let i = 0; i < 5; i++) {
+                        estrellasHTML += i < val.puntos ? '<i class="bi bi-star-fill text-warning"></i> ' : '<i class="bi bi-star text-warning"></i> ';
+                    }
+                    
+                    contenedorVal.innerHTML += `
+                        <div class="mb-3 border-bottom pb-2">
+                            <div class="d-flex justify-content-between">
+                                <strong>${val.nombre}</strong>
+                                <span>${estrellasHTML}</span>
+                            </div>
+                            <p class="mb-1 text-muted small">${val.comentario}</p>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('Error conectando con NestJS:', error);
+                document.getElementById('listaDisponibilidad').innerHTML = '<li class="list-group-item text-danger">Asegúrate de que el backend (npm run start:dev) esté encendido.</li>';
+            }
+        }
+
+        // Ejecutar toda esta lógica en cuanto la página termine de cargar
+        document.addEventListener('DOMContentLoaded', cargarPerfil);
+    </script>
+</body>
+
+</html>
