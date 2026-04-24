@@ -4,105 +4,700 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SISWORK - Autenticación</title>
+
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#eff6ff,#fef9c3);min-height:100vh;display:flex;align-items:center;justify-content:center}
-  .card{background:#fff;border-radius:20px;padding:40px;width:440px;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
-  .logo{text-align:center;font-size:28px;font-weight:800;color:#2563eb;margin-bottom:4px}
-  .logo span{color:#f59e0b}
-  .subtitle{text-align:center;color:#64748b;font-size:14px;margin-bottom:28px}
-  .tabs{display:flex;background:#f1f5f9;border-radius:10px;padding:4px;margin-bottom:24px}
-  .tab{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:#64748b;transition:all 0.2s}
-  .tab.active{background:#fff;color:#2563eb;box-shadow:0 2px 4px rgba(0,0,0,0.08)}
-  .form-group{margin-bottom:16px}
-  label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
-  input,select{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1e293b;outline:none;transition:border 0.2s}
-  input:focus,select:focus{border-color:#2563eb}
-  .rol-selector{display:flex;gap:10px;margin-bottom:16px}
-  .rol-btn{flex:1;padding:12px;border:2px solid #e2e8f0;border-radius:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;color:#64748b;transition:all 0.2s}
-  .rol-btn.active{border-color:#2563eb;color:#2563eb;background:#eff6ff}
-  .rol-btn .icon{font-size:22px;display:block;margin-bottom:4px}
-  .btn-main{width:100%;padding:13px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
-  .btn-main:hover{background:#1d4ed8}
-  .divider{text-align:center;color:#94a3b8;font-size:13px;margin:16px 0;position:relative}
-  .divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:#e2e8f0}
-  .divider::before{left:0}.divider::after{right:0}
-  .wa-btn{width:100%;padding:12px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
-  .forgot{text-align:center;margin-top:16px;font-size:13px;color:#64748b}
-  .forgot a{color:#2563eb;text-decoration:none;font-weight:600}
-  .alert{background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:16px}
-  #register-form{display:none}
-  #login-form{display:block}
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #1a56db;
+    --blue-light: #e8f0fe;
+    --blue-mid: #3b82f6;
+    --amber: #f59e0b;
+    --amber-light: #fef3c7;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #fef3c7 50%, #d1fae5 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .app { width: 100%; max-width: 440px; }
+
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+    border: 1px solid rgba(255,255,255,0.8);
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--gray-900);
+    text-align: center;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+  }
+  .logo span { color: var(--amber); }
+
+  .tagline {
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--gray-100);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+    gap: 4px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-400);
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .tab.active {
+    background: white;
+    color: var(--blue);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    font-weight: 600;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  input, select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-800);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: white;
+  }
+  input:focus, select:focus {
+    border-color: var(--blue-mid);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+  input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+
+  .rol-selector { display: flex; gap: 8px; margin-bottom: 14px; }
+  .rol-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-400);
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .rol-btn .icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .rol-btn.active {
+    border-color: var(--blue-mid);
+    color: var(--blue);
+    background: var(--blue-light);
+  }
+
+  .btn-main {
+    width: 100%;
+    padding: 13px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+  }
+  .btn-main:hover { background: #1344b8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,86,219,0.35); }
+  .btn-main:active { transform: translateY(0); }
+  .btn-main:disabled { opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .divider {
+    text-align: center;
+    color: var(--gray-400);
+    font-size: 12px;
+    margin: 14px 0;
+    position: relative;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 44%;
+    height: 1px;
+    background: var(--gray-200);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  .wa-btn {
+    width: 100%;
+    padding: 12px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .wa-btn:hover { background: #16a34a; transform: translateY(-1px); }
+
+  .forgot { text-align: center; margin-top: 14px; font-size: 12px; color: var(--gray-400); }
+  .forgot a { color: var(--blue); text-decoration: none; font-weight: 600; }
+
+  .alert-box {
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .alert-info { background: var(--amber-light); border: 1px solid #fcd34d; color: #92400e; }
+  .alert-success { background: var(--green-light); border: 1px solid #6ee7b7; color: #065f46; }
+  .alert-error { background: var(--red-light); border: 1px solid #fca5a5; color: #991b1b; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .strength-bar {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--gray-200);
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .strength-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s, background 0.3s;
+    width: 0%;
+  }
+
+  .user-panel {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--blue-mid));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin: 0 auto 16px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .user-name { text-align: center; font-size: 18px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
+  .user-role { text-align: center; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .role-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .badge-cliente { background: var(--green-light); color: #065f46; }
+  .badge-pro { background: var(--blue-light); color: #1e3a8a; }
+  .badge-tecnico { background: var(--amber-light); color: #78350f; }
+  .badge-admin { background: var(--red-light); color: #7f1d1d; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .info-card { background: var(--gray-50); border-radius: 10px; padding: 12px; border: 1px solid var(--gray-200); }
+  .info-card-label { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .info-card-val { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+
+  .btn-logout {
+    width: 100%;
+    padding: 11px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .btn-logout:hover { background: var(--red-light); border-color: #fca5a5; color: #991b1b; }
+
+  .users-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400); margin: 20px 0 10px; }
+  .user-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+  .user-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--gray-50);
+    border-radius: 10px;
+    border: 1px solid var(--gray-200);
+    font-size: 12px;
+  }
+  .user-item-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+  .user-item-name { font-weight: 600; color: var(--gray-800); }
+  .user-item-email { color: var(--gray-400); font-size: 11px; }
+  .ml-auto { margin-left: auto; }
+
+  .ai-chat-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .ai-chat-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .ai-response {
+    background: linear-gradient(135deg, #f5f3ff, #fdf4ff);
+    border: 1px solid #e9d5ff;
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #4c1d95;
+    line-height: 1.6;
+    display: none;
+  }
+
+  #login-form, #register-form, #user-panel { display: none; }
 </style>
-</head>
-<body>
-<div class="card">
-  <div class="logo">SIS<span>WORK</span></div>
-  <div class="subtitle">Plataforma de servicios técnicos La Paz</div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('login')">Ingresar</div>
-    <div class="tab" onclick="showTab('register')">Registrarse</div>
-  </div>
+<div class="app">
+  <div class="card">
+    <div class="logo">SIS<span>WORK</span></div>
+    <div class="tagline">Plataforma de servicios técnicos · La Paz</div>
 
-  <!-- LOGIN -->
-  <div id="login-form">
-    <div class="form-group">
-      <label>Correo electrónico</label>
-      <input type="email" placeholder="correo@ejemplo.com" value="usuario@gmail.com">
+    <div class="tabs" id="tabs">
+      <div class="tab active" onclick="showTab('login')">Ingresar</div>
+      <div class="tab" onclick="showTab('register')">Registrarse</div>
     </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" placeholder="••••••••" value="12345678">
-    </div>
-    <button class="btn-main" onclick="goTo('siswork_search.html')">Ingresar</button>
-    <div class="divider">o</div>
-    <button class="wa-btn">📱 Continuar con WhatsApp</button>
-    <div class="forgot"><a href="#">¿Olvidaste tu contraseña?</a></div>
-  </div>
 
-  <!-- REGISTER -->
-  <div id="register-form">
-    <div class="alert">📸 Sube una foto de perfil y tu CI para verificación básica</div>
-    <div class="form-group">
-      <label>¿Cómo quieres usar SISWORK?</label>
-      <div class="rol-selector">
-        <div class="rol-btn active" onclick="selectRol(this)"><span class="icon">🏠</span>Busco servicios</div>
-        <div class="rol-btn" onclick="selectRol(this)"><span class="icon">🔧</span>Ofrezco servicios</div>
+    <!-- LOGIN -->
+    <div id="login-form">
+      <div id="login-alert"></div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="correo@ejemplo.com" autocomplete="email">
       </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-main" id="login-btn" onclick="doLogin()">
+        <span id="login-btn-text">Ingresar</span>
+      </button>
+      <div class="divider">o</div>
+      <button class="wa-btn" onclick="loginWhatsApp()">📱 Continuar con WhatsApp</button>
+      <div class="forgot"><a href="#" onclick="forgotPass(event)">¿Olvidaste tu contraseña?</a></div>
     </div>
-    <div class="form-group">
-      <label>Nombre completo</label>
-      <input type="text" placeholder="Juan Pérez Mamani">
+
+    <!-- REGISTER -->
+    <div id="register-form">
+      <div id="reg-alert"></div>
+      <div class="form-group">
+        <label>¿Cómo usarás SISWORK?</label>
+        <div class="rol-selector">
+          <div class="rol-btn active" id="rol-cliente" onclick="selectRol('Cliente')"><span class="icon">🏠</span>Busco servicios</div>
+          <div class="rol-btn" id="rol-tecnico" onclick="selectRol('Técnico')"><span class="icon">🔧</span>Ofrezco servicios</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="reg-name" placeholder="Juan Pérez Mamani" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="correo@ejemplo.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Zona (La Paz)</label>
+        <select id="reg-zona">
+          <option value="">Selecciona tu zona...</option>
+          <option>Miraflores</option><option>Sopocachi</option><option>San Pedro</option>
+          <option>Obrajes</option><option>Alto Obrajes</option><option>Calacoto</option>
+          <option>Zona Sur</option><option>Chasquipampa</option><option>Achumani</option>
+          <option>El Alto</option><option>Centro</option><option>San Miguel</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres" oninput="checkStrength()" autocomplete="new-password">
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+      </div>
+      <button class="btn-main" id="reg-btn" onclick="doRegister()">
+        <span id="reg-btn-text">Crear cuenta</span>
+      </button>
     </div>
-    <div class="form-group">
-      <label>Correo electrónico</label>
-      <input type="email" placeholder="correo@ejemplo.com">
+
+    <!-- USER PANEL -->
+    <div id="user-panel">
+      <div class="avatar" id="user-avatar">?</div>
+      <div class="user-name" id="user-name-display"></div>
+      <div style="text-align:center;margin:6px 0 4px">
+        <span class="role-badge" id="user-role-badge"></span>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-label">Email</div>
+          <div class="info-card-val" id="user-email-display" style="font-size:11px;word-break:break-all"></div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Zona</div>
+          <div class="info-card-val" id="user-zona-display">—</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Estado</div>
+          <div class="info-card-val" style="color:#065f46">● Verificado</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Token JWT</div>
+          <div class="info-card-val" id="jwt-preview" style="font-size:10px;font-family:monospace;word-break:break-all"></div>
+        </div>
+      </div>
+
+      <div class="ai-chat-btn" onclick="askAI()">
+        ✨ Preguntar al asistente IA
+      </div>
+      <div class="ai-response" id="ai-response"></div>
+
+      <div class="users-title">Usuarios registrados</div>
+      <div class="user-list" id="user-list"></div>
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
     </div>
-    <div class="form-group">
-      <label>Zona (La Paz)</label>
-      <select>
-        <option>Miraflores</option><option>Sopocachi</option><option>San Pedro</option>
-        <option>Obrajes</option><option>Alto Obrajes</option><option>Calacoto</option>
-        <option>Zona Sur</option><option>Chasquipampa</option><option>El Alto</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" placeholder="Mínimo 8 caracteres">
-    </div>
-    <button class="btn-main" onclick="goTo('siswork_profiles.html')">Crear cuenta</button>
   </div>
 </div>
 
 <script>
-function showTab(tab){
-  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',i===(tab==='login'?0:1))});
-  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
-  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
+const DB_KEY = 'siswork_users';
+const SESSION_KEY = 'siswork_session';
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); } catch { return []; }
 }
-function selectRol(el){document.querySelectorAll('.rol-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
-function goTo(url){window.location.href=url}
+function saveUsers(u) { localStorage.setItem(DB_KEY, JSON.stringify(u)); }
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
+}
+function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+function makeJWT(email, role) {
+  const h = btoa(JSON.stringify({alg:'HS256',typ:'JWT'}));
+  const p = btoa(JSON.stringify({sub:email,role,exp:Date.now()+86400000,iss:'siswork'}));
+  const s = btoa(email+role+'siswork_secret').substring(0,16);
+  return `${h}.${p}.${s}`;
+}
+
+let selectedRol = 'Cliente';
+
+function selectRol(rol) {
+  selectedRol = rol;
+  document.querySelectorAll('.rol-btn').forEach(b => b.classList.remove('active'));
+  if (rol === 'Cliente') document.getElementById('rol-cliente').classList.add('active');
+  else document.getElementById('rol-tecnico').classList.add('active');
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === (tab === 'login' ? 0 : 1)));
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('user-panel').style.display = 'none';
+  document.getElementById('tabs').style.display = 'flex';
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  const icons = { info: 'ℹ️', success: '✅', error: '❌' };
+  el.innerHTML = `<div class="alert-box alert-${type}">${icons[type]||''} ${msg}</div>`;
+  setTimeout(() => { if (el) el.innerHTML = ''; }, 4500);
+}
+
+function setLoading(btnId, textId, loading, text) {
+  const btn = document.getElementById(btnId);
+  const txt = document.getElementById(textId);
+  btn.disabled = loading;
+  txt.textContent = text;
+  if (loading) {
+    const sp = document.createElement('div');
+    sp.className = 'spinner';
+    sp.id = 'sp-' + btnId;
+    btn.insertBefore(sp, btn.firstChild);
+  } else {
+    const sp = document.getElementById('sp-' + btnId);
+    if (sp) sp.remove();
+  }
+}
+
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  document.getElementById('login-email').classList.remove('error');
+  document.getElementById('login-pass').classList.remove('error');
+
+  if (!email || !validateEmail(email)) {
+    document.getElementById('login-email').classList.add('error');
+    showAlert('login-alert', 'Ingresa un correo válido.', 'error'); return;
+  }
+  if (!pass) {
+    document.getElementById('login-pass').classList.add('error');
+    showAlert('login-alert', 'Ingresa tu contraseña.', 'error'); return;
+  }
+
+  setLoading('login-btn', 'login-btn-text', true, 'Verificando...');
+
+  setTimeout(() => {
+    const users = getUsers();
+    const user = users.find(u => u.email === email && u.password === pass);
+    if (!user) {
+      setLoading('login-btn', 'login-btn-text', false, 'Ingresar');
+      showAlert('login-alert', 'Credenciales incorrectas. Verifica tu correo y contraseña.', 'error');
+      document.getElementById('login-email').classList.add('error');
+      document.getElementById('login-pass').classList.add('error');
+      return;
+    }
+    const token = makeJWT(email, user.role);
+    const session = { ...user, token };
+    saveSession(session);
+    setLoading('login-btn', 'login-btn-text', false, 'Ingresar');
+    showUserPanel(session);
+  }, 900);
+}
+
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const zona = document.getElementById('reg-zona').value;
+  const pass = document.getElementById('reg-pass').value;
+
+  if (!name || name.length < 3) { showAlert('reg-alert', 'Ingresa tu nombre completo.', 'error'); return; }
+  if (!email || !validateEmail(email)) { showAlert('reg-alert', 'Correo electrónico inválido.', 'error'); return; }
+  if (!zona) { showAlert('reg-alert', 'Selecciona tu zona en La Paz.', 'error'); return; }
+  if (pass.length < 8) { showAlert('reg-alert', 'La contraseña debe tener al menos 8 caracteres.', 'error'); return; }
+
+  const users = getUsers();
+  if (users.find(u => u.email === email)) {
+    showAlert('reg-alert', 'Este correo ya está registrado. Intenta ingresar.', 'error'); return;
+  }
+
+  setLoading('reg-btn', 'reg-btn-text', true, 'Creando cuenta...');
+
+  setTimeout(() => {
+    const newUser = { id: Date.now(), name, email, password: pass, role: selectedRol, zona, createdAt: new Date().toLocaleDateString('es-BO') };
+    users.push(newUser);
+    saveUsers(users);
+    const token = makeJWT(email, selectedRol);
+    const session = { ...newUser, token };
+    saveSession(session);
+    setLoading('reg-btn', 'reg-btn-text', false, 'Crear cuenta');
+    showUserPanel(session);
+  }, 1000);
+}
+
+function showUserPanel(session) {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('register-form').style.display = 'none';
+  document.getElementById('tabs').style.display = 'none';
+  const panel = document.getElementById('user-panel');
+  panel.style.display = 'block';
+
+  const initials = session.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-name-display').textContent = session.name;
+  document.getElementById('user-email-display').textContent = session.email;
+  document.getElementById('user-zona-display').textContent = session.zona || '—';
+  document.getElementById('jwt-preview').textContent = session.token.substring(0, 20) + '…';
+
+  const badge = document.getElementById('user-role-badge');
+  const badgeMap = { 'Cliente': 'badge-cliente', 'Técnico': 'badge-tecnico', 'Pro': 'badge-pro', 'Admin': 'badge-admin' };
+  badge.className = 'role-badge ' + (badgeMap[session.role] || 'badge-cliente');
+  badge.textContent = session.role;
+
+  renderUserList();
+}
+
+function renderUserList() {
+  const users = getUsers();
+  const list = document.getElementById('user-list');
+  if (!users.length) { list.innerHTML = '<div style="color:var(--gray-400);font-size:12px;padding:8px">No hay usuarios registrados aún.</div>'; return; }
+  list.innerHTML = users.map(u => {
+    const initials = u.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const roleColors = { 'Cliente':'#065f46','Técnico':'#78350f','Pro':'#1e3a8a','Admin':'#7f1d1d' };
+    return `<div class="user-item">
+      <div class="user-item-avatar">${initials}</div>
+      <div>
+        <div class="user-item-name">${u.name}</div>
+        <div class="user-item-email">${u.email}</div>
+      </div>
+      <span class="ml-auto role-badge" style="font-size:10px;background:${u.role==='Cliente'?'#d1fae5':u.role==='Técnico'?'#fef3c7':u.role==='Pro'?'#e8f0fe':'#fee2e2'};color:${roleColors[u.role]||'#065f46'};padding:2px 8px">${u.role}</span>
+    </div>`;
+  }).join('');
+}
+
+function doLogout() {
+  clearSession();
+  document.getElementById('user-panel').style.display = 'none';
+  document.getElementById('tabs').style.display = 'flex';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('ai-response').style.display = 'none';
+  showTab('login');
+}
+
+function loginWhatsApp() {
+  showAlert('login-alert', 'WhatsApp auth próximamente disponible.', 'info');
+}
+
+function forgotPass(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showAlert('login-alert', 'Escribe tu correo y luego haz clic en recuperar.', 'info'); return; }
+  showAlert('login-alert', `Se enviará un enlace de recuperación a ${email}`, 'success');
+}
+
+function checkStrength() {
+  const pass = document.getElementById('reg-pass').value;
+  const fill = document.getElementById('strength-fill');
+  let score = 0;
+  if (pass.length >= 8) score++;
+  if (/[A-Z]/.test(pass)) score++;
+  if (/[0-9]/.test(pass)) score++;
+  if (/[^A-Za-z0-9]/.test(pass)) score++;
+  const pct = (score / 4) * 100;
+  const colors = ['#ef4444','#f59e0b','#f59e0b','#10b981','#10b981'];
+  fill.style.width = pct + '%';
+  fill.style.background = colors[score] || '#ef4444';
+}
+
+async function askAI() {
+  const session = getSession();
+  if (!session) return;
+  const btn = document.querySelector('.ai-chat-btn');
+  const respEl = document.getElementById('ai-response');
+  btn.textContent = '⏳ Consultando...';
+  btn.style.opacity = '0.8';
+  btn.onclick = null;
+  respEl.style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Eres el asistente de SISWORK, plataforma de servicios técnicos en La Paz, Bolivia. El usuario se llama ${session.name} y tiene el rol de ${session.role} en la zona de ${session.zona || 'La Paz'}. Responde en español de forma breve, amigable y útil. Si es Cliente, ayúdalo a encontrar servicios. Si es Técnico, ayúdalo a ofrecer sus servicios.`,
+        messages: [{ role: 'user', content: `Hola, soy ${session.name}. ¿Qué puedo hacer en SISWORK con mi rol de ${session.role}?` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || 'Sin respuesta.';
+    respEl.textContent = text;
+    respEl.style.display = 'block';
+  } catch {
+    respEl.textContent = 'No se pudo conectar con el asistente. Verifica tu conexión.';
+    respEl.style.display = 'block';
+  }
+
+  btn.textContent = '✨ Preguntar al asistente IA';
+  btn.style.opacity = '1';
+  btn.onclick = askAI;
+}
+
+(function init() {
+  const session = getSession();
+  if (session) {
+    document.getElementById('tabs').style.display = 'none';
+    showUserPanel(session);
+  } else {
+    document.getElementById('login-form').style.display = 'block';
+  }
+})();
 </script>
-</body>
-</html>
