@@ -7,8 +7,9 @@ definePageMeta({
 
 type TwoFactorSetupResponse = {
   secret: string
-  qr_code: string
+  qr_code?: string
   manual_entry_key?: string
+  otpauth_uri?: string
 }
 
 const { apiAuth } = useApiAuth()
@@ -21,6 +22,7 @@ const successMessage = ref('')
 const setupData = ref<TwoFactorSetupResponse | null>(null)
 const code = ref('')
 const password = ref('')
+const qrCodeSrc = ref('')
 
 async function setupTwoFactor(): Promise<void> {
   loading.value = true
@@ -31,11 +33,33 @@ async function setupTwoFactor(): Promise<void> {
     setupData.value = await apiAuth<TwoFactorSetupResponse>('/api/v1/auth/2fa/setup', {
       method: 'POST'
     })
+
+    qrCodeSrc.value = ''
+
+    if (setupData.value?.qr_code) {
+      if (
+        setupData.value.qr_code.startsWith('data:image') ||
+        setupData.value.qr_code.startsWith('http://') ||
+        setupData.value.qr_code.startsWith('https://')
+      ) {
+        qrCodeSrc.value = setupData.value.qr_code
+      } else {
+        qrCodeSrc.value = `data:image/png;base64,${setupData.value.qr_code}`
+      }
+    } else if (setupData.value?.otpauth_uri) {
+      const { toDataURL } = await import('qrcode')
+      qrCodeSrc.value = await toDataURL(setupData.value.otpauth_uri, {
+        width: 220,
+        margin: 2
+      })
+    }
+
     successMessage.value = 'Se generó la configuración de 2FA.'
   } catch (error: any) {
     errorMessage.value =
       error?.data?.detail ||
       error?.data?.message ||
+      error?.message ||
       'No se pudo iniciar la configuración de 2FA'
   } finally {
     loading.value = false
@@ -61,6 +85,7 @@ async function confirmTwoFactor(): Promise<void> {
     errorMessage.value =
       error?.data?.detail ||
       error?.data?.message ||
+      error?.message ||
       'No se pudo confirmar el código 2FA'
   } finally {
     confirming.value = false
@@ -82,11 +107,14 @@ async function disableTwoFactor(): Promise<void> {
 
     successMessage.value = '2FA desactivado correctamente.'
     setupData.value = null
+    qrCodeSrc.value = ''
     password.value = ''
+    code.value = ''
   } catch (error: any) {
     errorMessage.value =
       error?.data?.detail ||
       error?.data?.message ||
+      error?.message ||
       'No se pudo desactivar el 2FA'
   } finally {
     disabling.value = false
@@ -140,13 +168,21 @@ async function disableTwoFactor(): Promise<void> {
           </UButton>
 
           <div v-if="setupData" class="space-y-3">
+            <div v-if="qrCodeSrc" class="flex justify-center">
+              <img
+                :src="qrCodeSrc"
+                alt="Código QR para configurar autenticación de dos factores"
+                class="rounded-lg border bg-white p-3 max-w-[220px]"
+              >
+            </div>
+
             <p class="text-sm text-muted">Secreto generado:</p>
-            <code class="block rounded-lg bg-(--ui-bg-muted) p-3 text-sm">
-              {{ setupData.secret }}
+            <code class="block rounded-lg bg-(--ui-bg-muted) p-3 text-sm break-all">
+              {{ setupData.manual_entry_key || setupData.secret }}
             </code>
 
             <p class="text-sm text-muted">
-              Si tu backend devuelve QR en texto/base64, aquí luego lo renderizamos.
+              Escanea el código QR con tu aplicación autenticadora o usa la clave manual.
             </p>
 
             <UInput

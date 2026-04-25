@@ -8,6 +8,11 @@ const navigation = [
     icon: 'i-lucide-layout-dashboard'
   },
   {
+    label: 'Usuarios',
+    to: '/users',
+    icon: 'i-lucide-users'
+  },
+  {
     label: 'Perfil',
     to: '/profile',
     icon: 'i-lucide-user-round'
