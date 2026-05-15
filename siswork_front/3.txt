@@ -1,0 +1,10 @@
+./node_modules/nitropack/dist/rollup/index.mjs:1994:        "#internal/nitro": runtimeDir,
+./node_modules/nitropack/dist/core/index.mjs:1376:            "#internal/nitro": [
+./node_modules/nitropack/dist/core/index.mjs:1382:            "#internal/nitro/*": [
+./node_modules/nuxt/dist/index.mjs:6915:      "#internal/nitro": join(nuxt.options.buildDir, "nitro.client.mjs"),
+./node_modules/@nuxt/vite-builder/dist/index.mjs:1384:			"#internal/nitro",
+./node_modules/@nuxt/vite-builder/dist/index.mjs:1385:			"#internal/nitro/utils"
+./node_modules/@nuxt/vite-builder/dist/index.mjs:1410:					"#internal/nitro",
+./node_modules/@nuxt/vite-builder/dist/index.mjs:1965:		"#internal/nitro": join(nuxt.options.buildDir, "nitro.client.mjs"),
+./node_modules/@nuxt/vite-builder/dist/index.mjs:2239:		nitro.options.virtual["#internal/nitro/ssr-stacktrace"] = `export { default } from ${JSON.stringify(resolve(distDir, "fix-stacktrace"))}`;
+./node_modules/@nuxt/vite-builder/dist/index.mjs:2240:		nitro.options.plugins.push("#internal/nitro/ssr-stacktrace");

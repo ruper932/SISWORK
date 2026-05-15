@@ -16,11 +16,57 @@ type MeResponse = {
   last_login_at: string | null
 }
 
+type UserListItemResponse = {
+  id: string
+  first_name?: string
+  last_name?: string
+  email?: string
+  role?: string
+  status?: string
+}
+
+type ProfessionalProfileListItemResponse = {
+  id: string
+  user_id?: string
+  verification_status?: string
+  average_rating?: number | null
+  ratings_count?: number
+  completed_services_count?: number
+  available_now?: boolean
+}
+
+type ServiceRequestListItemResponse = {
+  id: string
+  title?: string
+  status?: string
+  is_active?: boolean
+}
+
+type ProfessionalValidationQueueResponse = {
+  id: string
+  professional_profile_id?: string
+  status?: string
+}
+
+type SpecialtyListItemResponse = {
+  id: string
+  code?: string
+  name?: string
+  is_active?: boolean
+}
+
 const { apiAuth } = useApiAuth()
 
 const user = ref<MeResponse | null>(null)
 const loading = ref(true)
+const metricsLoading = ref(false)
 const errorMessage = ref('')
+
+const users = ref<UserListItemResponse[]>([])
+const professionalProfiles = ref<ProfessionalProfileListItemResponse[]>([])
+const serviceRequests = ref<ServiceRequestListItemResponse[]>([])
+const validationQueue = ref<ProfessionalValidationQueueResponse[]>([])
+const specialties = ref<SpecialtyListItemResponse[]>([])
 
 const fullName = computed(() => {
   if (!user.value) return ''
@@ -41,12 +87,74 @@ const lastLoginText = computed(() => {
   return new Date(user.value.last_login_at).toLocaleString('es-BO')
 })
 
+const totalUsers = computed(() => users.value.length)
+
+const totalProfessionals = computed(() => professionalProfiles.value.length)
+
+const totalSpecialties = computed(() => specialties.value.length)
+
+const totalRequests = computed(() => serviceRequests.value.length)
+
+const openRequests = computed(() =>
+  serviceRequests.value.filter(item => item.status === 'OPEN').length
+)
+
+const completedRequests = computed(() =>
+  serviceRequests.value.filter(item => item.status === 'COMPLETED').length
+)
+
+const pendingValidations = computed(() =>
+  validationQueue.value.filter(
+    item => item.status === 'PENDING' || item.status === 'INREVIEW'
+  ).length
+)
+
+const averageRating = computed(() => {
+  const ratings = professionalProfiles.value
+    .map(item => Number(item.average_rating ?? 0))
+    .filter(value => value > 0)
+
+  if (!ratings.length) return '0.00'
+
+  const total = ratings.reduce((sum, value) => sum + value, 0)
+  return (total / ratings.length).toFixed(2)
+})
+
+async function loadMetrics(): Promise<void> {
+  metricsLoading.value = true
+
+  try {
+    const [
+      usersResponse,
+      profilesResponse,
+      requestsResponse,
+      validationQueueResponse,
+      specialtiesResponse
+    ] = await Promise.all([
+      apiAuth<UserListItemResponse[]>('/api/v1/users').catch(() => []),
+      apiAuth<ProfessionalProfileListItemResponse[]>('/api/v1/professional-profiles').catch(() => []),
+      apiAuth<ServiceRequestListItemResponse[]>('/api/v1/service-requests').catch(() => []),
+      apiAuth<ProfessionalValidationQueueResponse[]>('/api/v1/professional-validation-queue').catch(() => []),
+      apiAuth<SpecialtyListItemResponse[]>('/api/v1/specialties').catch(() => [])
+    ])
+
+    users.value = Array.isArray(usersResponse) ? usersResponse : []
+    professionalProfiles.value = Array.isArray(profilesResponse) ? profilesResponse : []
+    serviceRequests.value = Array.isArray(requestsResponse) ? requestsResponse : []
+    validationQueue.value = Array.isArray(validationQueueResponse) ? validationQueueResponse : []
+    specialties.value = Array.isArray(specialtiesResponse) ? specialtiesResponse : []
+  } finally {
+    metricsLoading.value = false
+  }
+}
+
 async function loadProfile(): Promise<void> {
   loading.value = true
   errorMessage.value = ''
 
   try {
     user.value = await apiAuth<MeResponse>('/api/v1/auth/me')
+    await loadMetrics()
   } catch (error: any) {
     errorMessage.value =
       error?.data?.detail ||
@@ -85,7 +193,7 @@ onMounted(() => {
           Bienvenido<span v-if="user">, {{ user.first_name }}</span>
         </h1>
         <p class="text-sm text-muted">
-          Gestiona tu cuenta, revisa tu estado de seguridad y accede a tus acciones rápidas.
+          Gestiona tu cuenta, revisa tu estado de seguridad y consulta el resumen general del sistema.
         </p>
       </div>
 
@@ -94,7 +202,7 @@ onMounted(() => {
           color="neutral"
           variant="soft"
           icon="i-lucide-refresh-cw"
-          :loading="loading"
+          :loading="loading || metricsLoading"
           @click="loadProfile"
         >
           Actualizar
@@ -131,6 +239,52 @@ onMounted(() => {
     </div>
 
     <template v-else-if="user">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <UPageCard
+          title="Usuarios"
+          description="Total de usuarios registrados."
+          icon="i-lucide-users"
+          variant="subtle"
+        >
+          <p class="text-2xl font-bold text-highlighted">
+            {{ totalUsers }}
+          </p>
+        </UPageCard>
+
+        <UPageCard
+          title="Profesionales"
+          description="Perfiles profesionales registrados."
+          icon="i-lucide-briefcase-business"
+          variant="subtle"
+        >
+          <p class="text-2xl font-bold text-highlighted">
+            {{ totalProfessionals }}
+          </p>
+        </UPageCard>
+
+        <UPageCard
+          title="Solicitudes"
+          description="Solicitudes de servicio registradas."
+          icon="i-lucide-file-text"
+          variant="subtle"
+        >
+          <p class="text-2xl font-bold text-highlighted">
+            {{ totalRequests }}
+          </p>
+        </UPageCard>
+
+        <UPageCard
+          title="Validaciones"
+          description="Validaciones pendientes o en revisión."
+          icon="i-lucide-shield-alert"
+          variant="subtle"
+        >
+          <p class="text-2xl font-bold text-highlighted">
+            {{ pendingValidations }}
+          </p>
+        </UPageCard>
+      </div>
+
       <div class="grid grid-cols-1 gap-4 xl:grid-cols-4">
         <UPageCard
           class="xl:col-span-2"
@@ -262,14 +416,14 @@ onMounted(() => {
 
         <UPageCard
           title="Resumen"
-          description="Estado general de la sesión actual."
+          description="Estado general del sistema y la sesión actual."
           icon="i-lucide-layout-dashboard"
           variant="subtle"
         >
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-3">
               <span class="text-sm text-muted">ID de usuario</span>
-              <span class="max-w-[160px] truncate text-sm font-medium text-highlighted">
+              <span class="max-w-40 truncate text-sm font-medium text-highlighted">
                 {{ user.id }}
               </span>
             </div>
@@ -282,6 +436,26 @@ onMounted(() => {
             <div class="flex items-center justify-between">
               <span class="text-sm text-muted">Estado</span>
               <span class="text-sm font-medium text-highlighted">{{ user.status }}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-muted">Solicitudes abiertas</span>
+              <span class="text-sm font-medium text-highlighted">{{ openRequests }}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-muted">Solicitudes completadas</span>
+              <span class="text-sm font-medium text-highlighted">{{ completedRequests }}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-muted">Especialidades</span>
+              <span class="text-sm font-medium text-highlighted">{{ totalSpecialties }}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-muted">Rating promedio</span>
+              <span class="text-sm font-medium text-highlighted">{{ averageRating }}</span>
             </div>
           </div>
         </UPageCard>

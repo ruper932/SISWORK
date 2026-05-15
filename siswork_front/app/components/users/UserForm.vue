@@ -1,44 +1,76 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
-import * as z from 'zod'
+type UserFormData = {
+  id?: string
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  whatsapp_number: string
+  profile_photo_url: string
+  birth_date?: string
+  gender: string
+  role: string
+  status: string
+  is_active: boolean
+  email_verified_at?: string
+  last_login_at?: string
+  created_at?: string
+  updated_at?: string
+  password?: string
+}
 
-const emit = defineEmits<{
-  submit: [payload: any]
-}>()
-
-const props = defineProps<{
-  initialData?: any
+const props = withDefaults(defineProps<{
+  initialData?: Partial<UserFormData> | null
   isEdit?: boolean
-}>()
-
-const schema = z.object({
-  first_name: z.string().min(1, 'El nombre es obligatorio'),
-  last_name: z.string().min(1, 'El apellido es obligatorio'),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'Mínimo 8 caracteres').optional().or(z.literal('')),
-  phone: z.string().optional().nullable(),
-  whatsapp_number: z.string().optional().nullable(),
-  profile_photo_url: z.string().optional().nullable(),
-  birth_date: z.string().optional().nullable(),
-  gender: z.string().optional().nullable(),
-  role: z.string().min(1),
-  status: z.string().min(1),
-  is_active: z.boolean()
+  loading?: boolean
+}>(), {
+  initialData: null,
+  isEdit: false,
+  loading: false
 })
 
-const state = reactive({
+const emit = defineEmits<{
+  submit: [payload: Partial<UserFormData>]
+}>()
+
+const genderOptions = [
+  { label: 'Masculino', value: 'MALE' },
+  { label: 'Femenino', value: 'FEMALE' },
+  { label: 'Otro', value: 'OTHER' },
+  { label: 'Prefiero no decirlo', value: 'PREFER_NOT_TO_SAY' }
+]
+
+const roleOptions = [
+  { label: 'Administrador', value: 'ADMIN' },
+  { label: 'Usuario', value: 'USER' },
+  { label: 'Profesional', value: 'PROFESSIONAL' }
+]
+
+const statusOptions = [
+  { label: 'Activo', value: 'ACTIVE' },
+  { label: 'Inactivo', value: 'INACTIVE' },
+  { label: 'Suspendido', value: 'SUSPENDED' },
+  { label: 'Pendiente', value: 'PENDING' }
+]
+
+const form = reactive<UserFormData>({
+  id: '',
   first_name: '',
   last_name: '',
   email: '',
-  password: '',
   phone: '',
   whatsapp_number: '',
   profile_photo_url: '',
   birth_date: '',
   gender: '',
-  role: 'CLIENT',
-  status: 'ACTIVE',
-  is_active: true
+  role: '',
+  status: '',
+  is_active: true,
+  email_verified_at: '',
+  last_login_at: '',
+  created_at: '',
+  updated_at: '',
+  password: ''
 })
 
 watch(
@@ -46,136 +78,233 @@ watch(
   (value) => {
     if (!value) return
 
-    Object.assign(state, {
-      first_name: value.first_name ?? '',
-      last_name: value.last_name ?? '',
-      email: value.email ?? '',
-      password: '',
-      phone: value.phone ?? '',
-      whatsapp_number: value.whatsapp_number ?? '',
-      profile_photo_url: value.profile_photo_url ?? '',
-      birth_date: value.birth_date ? String(value.birth_date).slice(0, 10) : '',
-      gender: value.gender ?? '',
-      role: value.role ?? 'CLIENT',
-      status: value.status ?? 'ACTIVE',
-      is_active: value.is_active ?? true
-    })
+    form.id = value.id ?? ''
+    form.first_name = value.first_name ?? ''
+    form.last_name = value.last_name ?? ''
+    form.email = value.email ?? ''
+    form.phone = value.phone ?? ''
+    form.whatsapp_number = value.whatsapp_number ?? ''
+    form.profile_photo_url = value.profile_photo_url ?? ''
+    form.birth_date = value.birth_date ?? ''
+    form.gender = value.gender ?? ''
+    form.role = value.role ?? ''
+    form.status = value.status ?? ''
+    form.is_active = value.is_active ?? true
+    form.email_verified_at = value.email_verified_at ?? ''
+    form.last_login_at = value.last_login_at ?? ''
+    form.created_at = value.created_at ?? ''
+    form.updated_at = value.updated_at ?? ''
+    form.password = ''
   },
   { immediate: true }
 )
 
+function formatDateTime(value?: string) {
+  if (!value) return 'Sin registro'
+  return new Date(value).toLocaleString('es-BO')
+}
+
 function onSubmit() {
-  const basePayload = {
-    first_name: state.first_name,
-    last_name: state.last_name,
-    email: state.email,
-    phone: state.phone || null,
-    whatsapp_number: state.whatsapp_number || null,
-    profile_photo_url: state.profile_photo_url || null,
-    birth_date: state.birth_date || null,
-    gender: state.gender || null,
-    role: state.role,
-    status: state.status,
-    is_active: state.is_active
+  const payload: Partial<UserFormData> = {
+    first_name: form.first_name.trim(),
+    last_name: form.last_name.trim(),
+    email: form.email.trim(),
+    phone: form.phone.trim(),
+    whatsapp_number: form.whatsapp_number.trim(),
+    profile_photo_url: form.profile_photo_url.trim(),
+    birth_date: form.birth_date || undefined,
+    gender: form.gender,
+    role: form.role,
+    status: form.status,
+    is_active: form.is_active
   }
 
-  const payload = props.isEdit
-    ? {
-        ...basePayload,
-        ...(state.password ? { password: state.password } : {})
-      }
-    : {
-        ...basePayload,
-        password: state.password
-      }
+  if (form.password?.trim()) {
+    payload.password = form.password.trim()
+  }
 
   emit('submit', payload)
 }
 </script>
 
 <template>
-  <section class="rounded-2xl border border-default bg-(--ui-bg-elevated) shadow-sm">
-    <div class="border-b border-default px-6 py-5">
-      <h2 class="text-lg font-semibold text-highlighted">
-        {{ props.isEdit ? 'Actualizar usuario' : 'Registrar usuario' }}
-      </h2>
-      <p class="mt-1 text-sm text-muted">
-        Completa la información general del usuario.
-      </p>
-    </div>
+  <form class="space-y-6" @submit.prevent="onSubmit">
+    <UPageCard
+      title="Datos personales"
+      description="Información principal del usuario."
+      icon="i-lucide-user-round"
+      variant="subtle"
+    >
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <UFormGroup label="Nombre">
+          <UInput
+            v-model="form.first_name"
+            placeholder="Ingresa el nombre"
+            icon="i-lucide-user"
+          />
+        </UFormGroup>
 
-    <UForm :schema="schema" :state="state" class="space-y-6 p-6" @submit="onSubmit">
-      <div class="grid gap-5 md:grid-cols-2">
-        <UFormField label="Nombre" name="first_name">
-          <UInput v-model="state.first_name" size="xl" />
-        </UFormField>
+        <UFormGroup label="Apellido">
+          <UInput
+            v-model="form.last_name"
+            placeholder="Ingresa el apellido"
+            icon="i-lucide-user-round"
+          />
+        </UFormGroup>
 
-        <UFormField label="Apellido" name="last_name">
-          <UInput v-model="state.last_name" size="xl" />
-        </UFormField>
+        <UFormGroup label="Correo electrónico" class="md:col-span-2">
+          <UInput
+            v-model="form.email"
+            type="email"
+            placeholder="user@example.com"
+            icon="i-lucide-mail"
+          />
+        </UFormGroup>
 
-        <UFormField label="Email" name="email">
-          <UInput v-model="state.email" type="email" size="xl" />
-        </UFormField>
+        <UFormGroup label="Teléfono">
+          <UInput
+            v-model="form.phone"
+            placeholder="Ingresa el teléfono"
+            icon="i-lucide-phone"
+          />
+        </UFormGroup>
 
-        <UFormField :label="props.isEdit ? 'Contraseña nueva (opcional)' : 'Contraseña'" name="password">
-          <UInput v-model="state.password" type="password" size="xl" />
-        </UFormField>
+        <UFormGroup label="WhatsApp">
+          <UInput
+            v-model="form.whatsapp_number"
+            placeholder="Ingresa el número de WhatsApp"
+            icon="i-lucide-message-circle"
+          />
+        </UFormGroup>
 
-        <UFormField label="Teléfono" name="phone">
-          <UInput v-model="state.phone" size="xl" />
-        </UFormField>
+        <UFormGroup label="Foto de perfil" class="md:col-span-2">
+          <UInput
+            v-model="form.profile_photo_url"
+            placeholder="https://..."
+            icon="i-lucide-image"
+          />
+        </UFormGroup>
 
-        <UFormField label="WhatsApp" name="whatsapp_number">
-          <UInput v-model="state.whatsapp_number" size="xl" />
-        </UFormField>
+        <UFormGroup label="Fecha de nacimiento">
+          <UInput
+            v-model="form.birth_date"
+            type="date"
+            icon="i-lucide-calendar-days"
+          />
+        </UFormGroup>
 
-        <UFormField label="Foto de perfil" name="profile_photo_url" class="md:col-span-2">
-          <UInput v-model="state.profile_photo_url" size="xl" />
-        </UFormField>
+        <UFormGroup label="Género">
+          <USelect
+            v-model="form.gender"
+            :items="genderOptions"
+            value-key="value"
+            placeholder="Selecciona un género"
+          />
+        </UFormGroup>
+      </div>
+    </UPageCard>
 
-        <UFormField label="Fecha de nacimiento" name="birth_date">
-          <UInput v-model="state.birth_date" type="date" size="xl" />
-        </UFormField>
+    <UPageCard
+      title="Acceso y estado"
+      description="Configuración funcional del usuario dentro del sistema."
+      icon="i-lucide-shield-check"
+      variant="subtle"
+    >
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <UFormGroup label="Rol">
+          <USelect
+            v-model="form.role"
+            :items="roleOptions"
+            value-key="value"
+            placeholder="Selecciona un rol"
+          />
+        </UFormGroup>
 
-        <UFormField label="Género" name="gender">
-          <UInput v-model="state.gender" size="xl" />
-        </UFormField>
+        <UFormGroup label="Estado">
+          <USelect
+            v-model="form.status"
+            :items="statusOptions"
+            value-key="value"
+            placeholder="Selecciona un estado"
+          />
+        </UFormGroup>
 
-        <UFormField label="Rol" name="role">
-          <UInput v-model="state.role" size="xl" />
-        </UFormField>
+        <UFormGroup
+          :label="props.isEdit ? 'Nueva contraseña' : 'Contraseña'"
+          class="md:col-span-2"
+        >
+          <UInput
+            v-model="form.password"
+            type="password"
+            :placeholder="props.isEdit ? 'Solo si deseas cambiarla' : 'Ingresa una contraseña'"
+            icon="i-lucide-lock-keyhole"
+          />
+        </UFormGroup>
 
-        <UFormField label="Estado" name="status">
-          <UInput v-model="state.status" size="xl" />
-        </UFormField>
+        <div class="md:col-span-2">
+          <div class="flex items-center justify-between rounded-lg border border-default p-4">
+            <div>
+              <p class="text-sm font-medium text-highlighted">
+                Usuario activo
+              </p>
+              <p class="text-sm text-muted">
+                Define si la cuenta está habilitada en la plataforma.
+              </p>
+            </div>
 
-        <div class="flex items-center rounded-xl border border-default bg-(--ui-bg-muted) px-4 py-3">
-          <UCheckbox v-model="state.is_active" />
-          <span class="ml-3 text-sm font-medium text-highlighted">
-            Usuario activo
-          </span>
+            <USwitch v-model="form.is_active" />
+          </div>
         </div>
       </div>
+    </UPageCard>
 
-      <div class="flex flex-col gap-3 border-t border-default pt-6 sm:flex-row sm:justify-end">
-        <UButton
-          color="neutral"
-          variant="soft"
-          icon="i-lucide-arrow-left"
-          to="/users"
-        >
-          Cancelar
-        </UButton>
+    <UPageCard
+      v-if="props.isEdit"
+      title="Metadatos"
+      description="Información de auditoría visible pero no editable."
+      icon="i-lucide-info"
+      variant="subtle"
+    >
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <UFormGroup label="ID">
+          <UInput :model-value="form.id || ''" readonly />
+        </UFormGroup>
 
-        <UButton
-          type="submit"
-          color="primary"
-          icon="i-lucide-save"
-        >
-          {{ props.isEdit ? 'Guardar cambios' : 'Crear usuario' }}
-        </UButton>
+        <UFormGroup label="Correo verificado">
+          <UInput :model-value="formatDateTime(form.email_verified_at)" readonly />
+        </UFormGroup>
+
+        <UFormGroup label="Último acceso">
+          <UInput :model-value="formatDateTime(form.last_login_at)" readonly />
+        </UFormGroup>
+
+        <UFormGroup label="Creado en">
+          <UInput :model-value="formatDateTime(form.created_at)" readonly />
+        </UFormGroup>
+
+        <UFormGroup label="Actualizado en">
+          <UInput :model-value="formatDateTime(form.updated_at)" readonly />
+        </UFormGroup>
       </div>
-    </UForm>
-  </section>
+    </UPageCard>
+
+    <div class="flex justify-end gap-3">
+      <UButton
+        to="/users"
+        color="neutral"
+        variant="soft"
+      >
+        Cancelar
+      </UButton>
+
+      <UButton
+        type="submit"
+        color="primary"
+        :loading="props.loading"
+        icon="i-lucide-save"
+      >
+        {{ props.isEdit ? 'Guardar cambios' : 'Crear usuario' }}
+      </UButton>
+    </div>
+  </form>
 </template>

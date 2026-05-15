@@ -2,26 +2,13 @@
 const route = useRoute()
 
 const navigation = [
-  {
-    label: 'Dashboard',
-    to: '/dashboard',
-    icon: 'i-lucide-layout-dashboard'
-  },
-  {
-    label: 'Usuarios',
-    to: '/users',
-    icon: 'i-lucide-users'
-  },
-  {
-    label: 'Perfil',
-    to: '/profile',
-    icon: 'i-lucide-user-round'
-  },
-  {
-    label: 'Seguridad',
-    to: '/security',
-    icon: 'i-lucide-shield-check'
-  }
+  { label: 'Dashboard', to: '/dashboard', icon: 'i-lucide-layout-dashboard' },
+  { label: 'Usuarios', to: '/users', icon: 'i-lucide-users' },
+  { label: 'Profesionales', to: '/professionals', icon: 'i-lucide-briefcase-business' },
+  { label: 'Solicitudes', to: '/service-requests', icon: 'i-lucide-file-text' },
+  { label: 'Especialidades', to: '/specialties', icon: 'i-lucide-wrench' },
+  { label: 'Perfil', to: '/profile', icon: 'i-lucide-user-round' },
+  { label: 'Seguridad', to: '/security', icon: 'i-lucide-shield-check' }
 ]
 
 async function logout(): Promise<void> {
@@ -34,9 +21,9 @@ async function logout(): Promise<void> {
 </script>
 
 <template>
-  <div class="min-h-screen bg-(--ui-bg)">
+  <div class="min-h-screen bg-default">
     <div class="flex min-h-screen">
-      <aside class="hidden w-72 shrink-0 border-r border-default bg-(--ui-bg-elevated) lg:flex lg:flex-col">
+      <aside class="hidden w-72 shrink-0 border-r border-default bg-elevated lg:flex lg:flex-col">
         <div class="border-b border-default px-6 py-5">
           <p class="text-xs font-medium uppercase tracking-wider text-muted">
             SISWORK
@@ -54,7 +41,7 @@ async function logout(): Promise<void> {
             class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition"
             :class="route.path === item.to
               ? 'bg-primary/10 text-primary font-medium'
-              : 'text-muted hover:bg-(--ui-bg-muted) hover:text-highlighted'"
+              : 'text-muted hover:bg-muted hover:text-highlighted'"
           >
             <UIcon :name="item.icon" class="h-5 w-5" />
             <span>{{ item.label }}</span>
