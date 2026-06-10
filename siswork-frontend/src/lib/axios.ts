@@ -1,0 +1,32 @@
+import axios from "axios"
+import { getAccessToken, clearAccessToken } from "@/features/auth/auth-storage"
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
+export const api = axios.create({
+  baseURL: API_URL,
+})
+
+api.interceptors.request.use((config) => {
+  const token = getAccessToken()
+
+  config.headers = config.headers ?? {}
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+
+  return config
+})
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      clearAccessToken()
+    }
+    return Promise.reject(error)
+  },
+)
+
+export default api

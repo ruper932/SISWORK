@@ -1,3 +1,0 @@
-./node_modules/nitropack/dist/core/index.mjs:331:      from: "nitropack/runtime/internal/config",
-./node_modules/.cache/nuxt/.nuxt/types/nitro-imports.d.ts:138:export { useRuntimeConfig } from 'nitropack/runtime/internal/config';
-./.nuxt/types/nitro-imports.d.ts:138:export { useRuntimeConfig } from 'nitropack/runtime/internal/config';
