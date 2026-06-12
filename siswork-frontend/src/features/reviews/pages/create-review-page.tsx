@@ -1,6 +1,8 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate, useSearchParams } from "react-router-dom"
+
 import { useCreateReviewMutation } from "../hooks"
 import {
   reviewCreateSchema,
@@ -23,15 +25,34 @@ export function CreateReviewPage() {
     },
   })
 
-  const onSubmit = async (values: ReviewCreateFormOutput) => {
-    await mutation.mutateAsync({
-      application_id: values.application_id,
-      rating: values.rating,
-      comment: values.comment,
-    })
+  useEffect(() => {
+    if (applicationId) {
+      form.setValue("application_id", applicationId, {
+        shouldValidate: true,
+        shouldDirty: false,
+      })
+    }
+  }, [applicationId, form])
 
-    navigate("/reviews/me")
+  const onSubmit = async (values: ReviewCreateFormOutput) => {
+    try {
+      await mutation.mutateAsync({
+        application_id: values.application_id,
+        rating: values.rating,
+        comment: values.comment,
+      })
+
+      navigate("/reviews/me")
+    } catch (error) {
+      console.error("Error creating review:", error)
+    }
   }
+
+  const applicationIdError = form.formState.errors.application_id?.message
+  const ratingError = form.formState.errors.rating?.message
+  const commentError = form.formState.errors.comment?.message
+  const mutationError =
+    mutation.error instanceof Error ? mutation.error.message : null
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8">
@@ -47,13 +68,12 @@ export function CreateReviewPage() {
           </label>
           <input
             id="application_id"
-            className="w-full rounded-md border px-3 py-2"
+            readOnly={Boolean(applicationId)}
+            className="w-full rounded-md border px-3 py-2 read-only:bg-muted read-only:text-muted-foreground"
             {...form.register("application_id")}
           />
-          {form.formState.errors.application_id && (
-            <p className="text-sm text-red-600">
-              {form.formState.errors.application_id.message}
-            </p>
+          {applicationIdError && (
+            <p className="text-sm text-red-600">{applicationIdError}</p>
           )}
         </div>
 
@@ -64,7 +84,7 @@ export function CreateReviewPage() {
           <select
             id="rating"
             className="w-full rounded-md border px-3 py-2"
-            {...form.register("rating")}
+            {...form.register("rating", { valueAsNumber: true })}
           >
             <option value={1}>1</option>
             <option value={2}>2</option>
@@ -72,11 +92,7 @@ export function CreateReviewPage() {
             <option value={4}>4</option>
             <option value={5}>5</option>
           </select>
-          {form.formState.errors.rating && (
-            <p className="text-sm text-red-600">
-              {form.formState.errors.rating.message}
-            </p>
-          )}
+          {ratingError && <p className="text-sm text-red-600">{ratingError}</p>}
         </div>
 
         <div className="space-y-2">
@@ -87,22 +103,35 @@ export function CreateReviewPage() {
             id="comment"
             rows={5}
             className="w-full rounded-md border px-3 py-2"
+            placeholder="Describe cómo fue la experiencia con el profesional"
             {...form.register("comment")}
           />
-          {form.formState.errors.comment && (
-            <p className="text-sm text-red-600">
-              {form.formState.errors.comment.message}
-            </p>
-          )}
+          {commentError && <p className="text-sm text-red-600">{commentError}</p>}
         </div>
 
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-        >
-          {mutation.isPending ? "Guardando..." : "Enviar reseña"}
-        </button>
+        {mutationError && (
+          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {mutationError}
+          </div>
+        )}
+
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            {mutation.isPending ? "Guardando..." : "Enviar reseña"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/reviews/me")}
+            className="rounded-md border px-4 py-2 text-sm font-medium"
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </main>
   )

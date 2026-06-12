@@ -36,6 +36,8 @@ export interface RequestItem {
   urgency: UrgencyLevel
   status: RequestStatus
   is_review_enabled: boolean
+  can_review: boolean
+  reviewable_application_id?: string | null
   cancellation_reason: string | null
   created_at: string
   updated_at: string

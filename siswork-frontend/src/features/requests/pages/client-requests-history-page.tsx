@@ -6,6 +6,8 @@ import {
   CheckCircle2,
   CircleDollarSign,
   MapPin,
+  Star,
+  XCircle,
 } from "lucide-react"
 
 import { useMyRequestsQuery } from "../hooks"
@@ -13,6 +15,7 @@ import type { RequestItem } from "../types"
 
 function formatMoney(value: string | null) {
   if (!value) return "—"
+
   const numberValue = Number(value)
   if (Number.isNaN(numberValue)) return value
 
@@ -32,20 +35,60 @@ function formatDate(value: string | null) {
   return date.toLocaleString("es-BO")
 }
 
+function getHistoryMeta(status: string) {
+  switch (status) {
+    case "COMPLETED":
+      return {
+        badge: "Completada",
+        title: "Solicitud completada",
+        cardClass:
+          "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400",
+        icon: CheckCircle2,
+      }
+    case "CANCELLED":
+      return {
+        badge: "Cancelada",
+        title: "Solicitud cancelada",
+        cardClass:
+          "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400",
+        icon: XCircle,
+      }
+    default:
+      return {
+        badge: status,
+        title: "Solicitud finalizada",
+        cardClass:
+          "bg-slate-500/10 text-slate-600 border-slate-500/20 dark:text-slate-300",
+        icon: CheckCircle2,
+      }
+  }
+}
+
 function RequestHistoryCard({ request }: { request: RequestItem }) {
+  const meta = getHistoryMeta(request.status)
+  const StatusIcon = meta.icon
+
+  const reviewLink = request.reviewable_application_id
+    ? {
+        pathname: "/reviews/new",
+        search: `?applicationId=${encodeURIComponent(
+          request.reviewable_application_id,
+        )}`,
+      }
+    : `/requests/${request.id}`
+
   return (
-    <Link
-      to={`/requests/${request.id}`}
-      className="group block rounded-[1.75rem] border border-border/60 bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
-    >
+    <article className="rounded-[1.75rem] border border-border/60 bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Solicitud completada
+          <div
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${meta.cardClass}`}
+          >
+            <StatusIcon className="h-3.5 w-3.5" />
+            {meta.title}
           </div>
 
-          <h3 className="mt-4 text-lg font-semibold tracking-tight text-foreground transition group-hover:text-primary">
+          <h3 className="mt-4 text-lg font-semibold tracking-tight text-foreground">
             {request.title}
           </h3>
 
@@ -58,8 +101,10 @@ function RequestHistoryCard({ request }: { request: RequestItem }) {
           </div>
         </div>
 
-        <span className="shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">
-          Completada
+        <span
+          className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${meta.cardClass}`}
+        >
+          {meta.badge}
         </span>
       </div>
 
@@ -89,11 +134,26 @@ function RequestHistoryCard({ request }: { request: RequestItem }) {
         </div>
       </div>
 
-      <div className="mt-5 flex items-center gap-2 text-sm font-medium text-primary">
-        Ver detalle
-        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <Link
+          to={`/requests/${request.id}`}
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary transition hover:opacity-80"
+        >
+          Ver detalle
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+
+        {request.can_review ? (
+          <Link
+            to={reviewLink}
+            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-95"
+          >
+            <Star className="h-4 w-4" />
+            Dejar reseña
+          </Link>
+        ) : null}
       </div>
-    </Link>
+    </article>
   )
 }
 
@@ -121,15 +181,23 @@ export function ClientRequestsHistoryPage() {
 
   const allRequests = data?.items ?? []
 
-  const completedRequests = allRequests.filter(
-    (request) => request.status === "COMPLETED",
+  const historyRequests = allRequests.filter((request) =>
+    ["COMPLETED", "CANCELLED"].includes(request.status),
   )
 
-  const total = completedRequests.length
+  const completedCount = historyRequests.filter(
+    (request) => request.status === "COMPLETED",
+  ).length
+
+  const cancelledCount = historyRequests.filter(
+    (request) => request.status === "CANCELLED",
+  ).length
+
+  const total = historyRequests.length
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <section className="rounded-[2rem] border border-border/60 bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-500 p-6 text-white shadow-xl shadow-emerald-500/10 sm:p-8">
+      <section className="rounded-4xl border border-border/60 bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-500 p-6 text-white shadow-xl shadow-emerald-500/10 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide">
@@ -138,11 +206,11 @@ export function ClientRequestsHistoryPage() {
             </div>
 
             <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Solicitudes completadas
+              Solicitudes finalizadas
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
-              Revisa el historial de solicitudes que ya concluyeron correctamente.
+              Revisa el historial de solicitudes completadas y canceladas.
             </p>
           </div>
 
@@ -158,23 +226,23 @@ export function ClientRequestsHistoryPage() {
 
       <section className="mt-6 grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">Solicitudes completadas</p>
+          <p className="text-sm text-muted-foreground">Solicitudes finalizadas</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
             {isLoading ? "—" : total}
           </p>
         </div>
 
         <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">Estado del historial</p>
-          <p className="mt-2 text-lg font-semibold text-foreground">
-            {isError ? "Con incidencias" : "Disponible"}
+          <p className="text-sm text-muted-foreground">Completadas</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+            {isLoading ? "—" : completedCount}
           </p>
         </div>
 
         <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">Seguimiento</p>
-          <p className="mt-2 text-lg font-semibold text-foreground">
-            Revisa trabajos concluidos
+          <p className="text-sm text-muted-foreground">Canceladas</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+            {isLoading ? "—" : cancelledCount}
           </p>
         </div>
       </section>
@@ -189,28 +257,28 @@ export function ClientRequestsHistoryPage() {
 
       {isError && (
         <section className="mt-6 rounded-3xl border border-destructive/20 bg-destructive/10 px-5 py-4 text-sm text-destructive">
-          No se pudo cargar el historial de solicitudes completadas.
+          No se pudo cargar el historial de solicitudes finalizadas.
         </section>
       )}
 
       {!isLoading && !isError && (
         <section className="mt-6">
-          {completedRequests.length ? (
+          {historyRequests.length ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {completedRequests.map((request) => (
+              {historyRequests.map((request) => (
                 <RequestHistoryCard key={request.id} request={request} />
               ))}
             </div>
           ) : (
-            <div className="rounded-[2rem] border border-border/60 bg-card p-10 text-center shadow-sm">
+            <div className="rounded-4xl border border-border/60 bg-card p-10 text-center shadow-sm">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <h2 className="mt-5 text-xl font-semibold text-foreground">
-                Aún no tienes solicitudes completadas
+                Aún no tienes solicitudes finalizadas
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                Cuando una de tus solicitudes sea marcada como completada, aparecerá aquí.
+                Cuando una de tus solicitudes sea completada o cancelada, aparecerá aquí.
               </p>
               <Link
                 to="/requests"

@@ -1,4 +1,4 @@
-export interface ReviewItem {
+export type ReviewItem = {
   id: string
   application_id: string
   reviewer_ci: string
@@ -9,7 +9,7 @@ export interface ReviewItem {
   updated_at: string
 }
 
-export interface ReviewCreateInput {
+export type ReviewCreateInput = {
   application_id: string
   rating: number
   comment: string

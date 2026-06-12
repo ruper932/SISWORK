@@ -213,18 +213,23 @@ export function RequestsListPage() {
   const allRequests = data?.items ?? []
   const userRoles = user?.roles ?? []
 
+  const isProfessional = userRoles.includes("PROFESSIONAL")
+  const isClient = userRoles.includes("CLIENT")
   const canViewAllRequests =
     userRoles.includes("ADMIN") ||
     userRoles.includes("SUPPORT") ||
     userRoles.includes("SUPERADMIN")
 
-  const baseRequests = canViewAllRequests
+  const baseRequests = canViewAllRequests || isProfessional
     ? allRequests
-    : allRequests.filter((request) => request.client_ci === user?.ci)
+    : isClient
+      ? allRequests.filter((request) => request.client_ci === user?.ci)
+      : []
 
-  const requestsWithoutHistory = canViewAllRequests
-    ? baseRequests
-    : baseRequests.filter((request) => request.status !== "COMPLETED")
+  const requestsWithoutHistory =
+    canViewAllRequests || isProfessional
+      ? baseRequests
+      : baseRequests.filter((request) => request.status !== "COMPLETED")
 
   const cities = useMemo(() => {
     return Array.from(
@@ -252,6 +257,10 @@ export function RequestsListPage() {
     const max = maxBudget ? Number(maxBudget) : null
 
     let filtered = [...requestsWithoutHistory]
+
+    if (isProfessional) {
+      filtered = filtered.filter((request) => request.status === "OPEN")
+    }
 
     if (searchTerm) {
       filtered = filtered.filter((request) => {
@@ -329,6 +338,7 @@ export function RequestsListPage() {
     minBudget,
     maxBudget,
     sortBy,
+    isProfessional,
   ])
 
   const total = requests.length
@@ -344,6 +354,20 @@ export function RequestsListPage() {
     setSortBy("updated_desc")
   }
 
+  const pageTitle = canViewAllRequests || isProfessional
+    ? "Explora solicitudes disponibles"
+    : "Tus solicitudes"
+
+  const pageDescription = canViewAllRequests || isProfessional
+    ? "Encuentra oportunidades activas, revisa presupuestos, urgencia y ubicación, y accede a cada detalle desde un solo panel."
+    : "Revisa las solicitudes activas que publicaste, filtra por estado, ubicación, urgencia o presupuesto, y accede también a tu historial."
+
+  const recommendedAction = isProfessional
+    ? "Postúlate a nuevas solicitudes"
+    : canViewAllRequests
+      ? "Revisa nuevas oportunidades"
+      : "Gestiona tus solicitudes"
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <section className="rounded-[2rem] border border-border/60 bg-gradient-to-br from-primary via-primary to-violet-500 p-6 text-primary-foreground shadow-xl shadow-primary/10 sm:p-8">
@@ -355,20 +379,16 @@ export function RequestsListPage() {
             </div>
 
             <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-              {canViewAllRequests
-                ? "Explora solicitudes disponibles"
-                : "Tus solicitudes"}
+              {pageTitle}
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-6 text-primary-foreground/80 sm:text-base">
-              {canViewAllRequests
-                ? "Encuentra oportunidades activas, revisa presupuestos, urgencia y ubicación, y accede a cada detalle desde un solo panel."
-                : "Revisa las solicitudes activas que publicaste, filtra por estado, ubicación, urgencia o presupuesto, y accede también a tu historial."}
+              {pageDescription}
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            {!canViewAllRequests && (
+            {!canViewAllRequests && !isProfessional && (
               <Link
                 to="/requests/history"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/15"
@@ -378,13 +398,15 @@ export function RequestsListPage() {
               </Link>
             )}
 
-            <Link
-              to="/requests/new"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:opacity-95"
-            >
-              <Plus className="h-4 w-4" />
-              Nueva solicitud
-            </Link>
+            {!isProfessional && (
+              <Link
+                to="/requests/new"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:opacity-95"
+              >
+                <Plus className="h-4 w-4" />
+                Nueva solicitud
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -407,9 +429,7 @@ export function RequestsListPage() {
         <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">Acción recomendada</p>
           <p className="mt-2 text-lg font-semibold text-foreground">
-            {canViewAllRequests
-              ? "Revisa nuevas oportunidades"
-              : "Gestiona tus solicitudes"}
+            {recommendedAction}
           </p>
         </div>
       </section>
@@ -418,14 +438,14 @@ export function RequestsListPage() {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">
-            {canViewAllRequests
+            {canViewAllRequests || isProfessional
               ? "Listado de solicitudes"
               : "Listado de tus solicitudes"}
           </h2>
         </div>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          {canViewAllRequests
+          {canViewAllRequests || isProfessional
             ? "Aplica filtros por texto, estado, urgencia, ubicación, presupuesto y orden."
             : "Aquí se muestran tus solicitudes no completadas. Las completadas se encuentran en el historial."}
         </p>
@@ -461,7 +481,9 @@ export function RequestsListPage() {
               <option value="IN_PROGRESS">En progreso</option>
               <option value="CANCELLED">Cancelada</option>
               <option value="EXPIRED">Expirada</option>
-              {canViewAllRequests && <option value="COMPLETED">Completada</option>}
+              {(canViewAllRequests || isProfessional) && (
+                <option value="COMPLETED">Completada</option>
+              )}
             </select>
           </div>
 
@@ -613,7 +635,7 @@ export function RequestsListPage() {
                 No hay solicitudes disponibles
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                {canViewAllRequests
+                {canViewAllRequests || isProfessional
                   ? "No hay resultados con los filtros actuales."
                   : "No tienes solicitudes activas que coincidan con los filtros aplicados."}
               </p>
@@ -626,12 +648,14 @@ export function RequestsListPage() {
                   Limpiar filtros
                 </button>
 
-                <Link
-                  to="/requests/new"
-                  className="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-95"
-                >
-                  Crear solicitud
-                </Link>
+                {!isProfessional && (
+                  <Link
+                    to="/requests/new"
+                    className="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-95"
+                  >
+                    Crear solicitud
+                  </Link>
+                )}
               </div>
             </div>
           )}
