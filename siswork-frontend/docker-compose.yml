@@ -1,0 +1,7 @@
+services:
+  siswork_frontend:
+    build: .
+    container_name: siswork_frontend_prod
+    restart: unless-stopped
+    ports:
+      - "3001:80"

@@ -1,7 +1,6 @@
 import api from "@/lib/axios"
 import type {
   RejectVerificationInput,
-  SupportVerificationItem,
 } from "./types"
 
 export async function approveVerification(verificationRequestId: string) {

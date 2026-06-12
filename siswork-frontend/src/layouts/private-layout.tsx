@@ -8,7 +8,6 @@ import {
   FileText,
   Star,
   ShieldCheck,
-  Settings,
   LogOut,
   UserCog,
 } from "lucide-react"
