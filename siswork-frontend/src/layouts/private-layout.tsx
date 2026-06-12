@@ -1,4 +1,5 @@
 import { ModeToggle } from "@/components/mode-toggle"
+import { BadgeCheck } from "lucide-react"
 import { Link, NavLink, Outlet } from "react-router-dom"
 import {
   LayoutDashboard,
@@ -54,10 +55,22 @@ const navItems: NavItem[] = [
     icon: Star,
   },
   {
+    to: "/professional-requests/me",
+    label: "Ser profesional",
+    icon: BadgeCheck,
+    allowedRoles: ["CLIENT"],
+  },
+  {
+    to: "/support/professional-requests",
+    label: "Solicitudes profesionales",
+    icon: BadgeCheck,
+    allowedRoles: ["SUPPORT", "ADMIN", "SUPERADMIN"],
+  },
+  {
     to: "/support",
     label: "Soporte",
     icon: ShieldCheck,
-    allowedRoles: ["ADMIN", "SUPERADMIN"],
+    allowedRoles: ["SUPPORT","ADMIN", "SUPERADMIN"],
   },
   /*{
     to: "/admin",

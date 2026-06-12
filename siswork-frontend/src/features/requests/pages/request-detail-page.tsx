@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom"
 import { useMemo, useState } from "react"
+import { Star } from "lucide-react"
 
 import {
   useCancelRequestMutation,
@@ -9,11 +10,15 @@ import {
 } from "../hooks"
 import { useAuth } from "@/features/auth/use-auth"
 import { CreateApplicationDialog } from "@/features/applications/components/create-application-dialog"
-import { useMyApplicationsQuery } from "@/features/applications/hooks"
+import {
+  useMyApplicationsQuery,
+  useRequestApplicationsQuery,
+} from "@/features/applications/hooks"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { RequestLocationMap } from "@/components/request-location-map"
 
 function formatMoney(value: string | null) {
   if (!value) return "—"
@@ -73,6 +78,7 @@ export function RequestDetailPage() {
 
   const { data: request, isLoading, isError } = useRequestQuery(requestId)
   const { data: myApplicationsData } = useMyApplicationsQuery()
+  const { data: requestApplicationsData } = useRequestApplicationsQuery(requestId)
 
   const cancelMutation = useCancelRequestMutation()
   const startMutation = useStartRequestMutation()
@@ -80,11 +86,28 @@ export function RequestDetailPage() {
 
   const userRoles = user?.roles ?? []
   const myApplications = myApplicationsData?.items ?? []
+  const requestApplications = requestApplicationsData?.items ?? []
 
   const hasApplied = useMemo(() => {
     if (!request) return false
     return myApplications.some((application) => application.request_id === request.id)
   }, [myApplications, request])
+
+  const assignedProfessionalProfileId =
+    request?.assigned_professional_profile_id ?? null
+
+  const acceptedApplication = useMemo(() => {
+    if (!requestApplications.length) return null
+
+    return (
+      requestApplications.find((application) => application.status === "ACCEPTED") ??
+      requestApplications.find(
+        (application) =>
+          application.professional_profile_id === assignedProfessionalProfileId,
+      ) ??
+      null
+    )
+  }, [requestApplications, assignedProfessionalProfileId])
 
   const permissions = useMemo(() => {
     if (!request || !user) {
@@ -97,6 +120,7 @@ export function RequestDetailPage() {
         canCancel: false,
         canViewApplications: false,
         canApply: false,
+        canReview: false,
       }
     }
 
@@ -128,6 +152,12 @@ export function RequestDetailPage() {
       !request.assigned_professional_profile_id &&
       !hasApplied
 
+    const canReview =
+      isOwnerClient &&
+      request.status === "COMPLETED" &&
+      request.can_review &&
+      request.is_review_enabled
+
     return {
       isOwnerClient,
       isProfessional,
@@ -137,6 +167,7 @@ export function RequestDetailPage() {
       canCancel,
       canViewApplications,
       canApply,
+      canReview,
     }
   }, [request, user, userRoles, hasApplied])
 
@@ -155,6 +186,18 @@ export function RequestDetailPage() {
       </main>
     )
   }
+
+  const reviewLink = acceptedApplication
+    ? {
+        pathname: "/reviews/new",
+        search: `?applicationId=${encodeURIComponent(acceptedApplication.id)}`,
+      }
+    : null
+
+  const latitude = request.latitude
+  const longitude = request.longitude
+  const hasLocation =
+    typeof latitude === "number" && typeof longitude === "number"
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8">
@@ -236,6 +279,27 @@ export function RequestDetailPage() {
             </div>
           </dl>
 
+          {hasLocation && (
+            <div className="mt-6 space-y-3">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Ubicación
+                </p>
+                <p className="mt-1 text-sm font-medium">
+                  Latitud: {latitude} · Longitud: {longitude}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Vista referencial de la ubicación registrada en la solicitud.
+                </p>
+              </div>
+
+              <RequestLocationMap
+                latitude={latitude}
+                longitude={longitude}
+              />
+            </div>
+          )}
+
           {request.assigned_professional && (
             <div className="mt-6 rounded-lg border bg-muted/30 p-4">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -260,6 +324,13 @@ export function RequestDetailPage() {
           {hasApplied && (
             <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
               Ya realizaste una postulación para esta solicitud.
+            </div>
+          )}
+
+          {permissions.canReview && !reviewLink && (
+            <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+              La solicitud puede ser reseñada, pero aún no se pudo resolver la
+              aplicación aceptada desde el detalle.
             </div>
           )}
 
@@ -306,6 +377,15 @@ export function RequestDetailPage() {
               <Button asChild variant="secondary">
                 <Link to={`/applications/request/${request.id}`}>
                   Ver postulaciones
+                </Link>
+              </Button>
+            )}
+
+            {permissions.canReview && reviewLink && (
+              <Button asChild>
+                <Link to={reviewLink}>
+                  <Star className="mr-2 h-4 w-4" />
+                  Dejar reseña
                 </Link>
               </Button>
             )}

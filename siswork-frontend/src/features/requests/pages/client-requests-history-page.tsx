@@ -68,14 +68,15 @@ function RequestHistoryCard({ request }: { request: RequestItem }) {
   const meta = getHistoryMeta(request.status)
   const StatusIcon = meta.icon
 
-  const reviewLink = request.reviewable_application_id
-    ? {
-        pathname: "/reviews/new",
-        search: `?applicationId=${encodeURIComponent(
-          request.reviewable_application_id,
-        )}`,
-      }
-    : `/requests/${request.id}`
+  const canGoDirectToReview =
+    request.can_review && Boolean(request.reviewable_application_id)
+
+  const directReviewLink = {
+    pathname: "/reviews/new",
+    search: `?applicationId=${encodeURIComponent(
+      request.reviewable_application_id ?? "",
+    )}`,
+  }
 
   return (
     <article className="rounded-[1.75rem] border border-border/60 bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10">
@@ -143,13 +144,21 @@ function RequestHistoryCard({ request }: { request: RequestItem }) {
           <ArrowRight className="h-4 w-4" />
         </Link>
 
-        {request.can_review ? (
+        {canGoDirectToReview ? (
           <Link
-            to={reviewLink}
+            to={directReviewLink}
             className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-95"
           >
             <Star className="h-4 w-4" />
             Dejar reseña
+          </Link>
+        ) : request.can_review ? (
+          <Link
+            to={`/requests/${request.id}`}
+            className="inline-flex items-center gap-2 rounded-2xl border border-primary/30 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/5"
+          >
+            <Star className="h-4 w-4" />
+            Ir al detalle para reseñar
           </Link>
         ) : null}
       </div>

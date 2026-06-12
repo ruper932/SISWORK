@@ -34,6 +34,9 @@ import { VerificationRequestsPage } from "@/features/support/pages/verification-
 import { AdminPage } from "@/features/admin/admin-page"
 import { UsersAdminPage } from "@/features/users/pages/users-admin-page"
 
+import { MyProfessionalRequestPage } from "@/features/professional-requests/pages/my-professional-request-page"
+import { PendingProfessionalRequestsPage } from "@/features/professional-requests/pages/pending-professional-requests-page"
+
 function NotFoundPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
@@ -134,7 +137,10 @@ export const router = createBrowserRouter([
             path: "/reviews/:reviewId",
             element: <ReviewDetailPage />,
           },
-
+          {
+            path: "/professional-requests/me",
+            element: <MyProfessionalRequestPage />,
+          },
           {
             path: "/support",
             element: <SupportDashboardPage />,
@@ -148,7 +154,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute roles={["ADMIN", "SUPERADMIN"]} />,
+    element: <ProtectedRoute roles={["SUPPORT","ADMIN", "SUPERADMIN"]} />,
     children: [
       {
         element: <PrivateLayout />,
@@ -160,6 +166,10 @@ export const router = createBrowserRouter([
           {
             path: "/admin/users",
             element: <UsersAdminPage />,
+          },
+          {
+            path: "/support/professional-requests",
+            element: <PendingProfessionalRequestsPage />,
           },
         ],
       },

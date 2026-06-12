@@ -12,7 +12,13 @@ import {
 import { useSpecialtiesQuery } from "@/features/specialties/hooks"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,12 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { LocationPicker } from "@/components/location-picker"
 
 const urgencyOptions = [
   { value: "LOW", label: "Baja" },
   { value: "MEDIUM", label: "Media" },
   { value: "HIGH", label: "Alta" },
 ] as const
+
+function toOptionalNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined
+}
 
 export function RequestCreatePage() {
   const navigate = useNavigate()
@@ -61,7 +72,16 @@ export function RequestCreatePage() {
     defaultValues,
   })
 
+  const latitude = toOptionalNumber(form.watch("latitude"))
+  const longitude = toOptionalNumber(form.watch("longitude"))
+
   const onSubmit = async (values: RequestCreateFormOutput) => {
+    const isLocationValid = await form.trigger(["latitude", "longitude"])
+
+    if (!isLocationValid) {
+      return
+    }
+
     await createMutation.mutateAsync({
       ...values,
       budget: values.budget ?? null,
@@ -236,25 +256,58 @@ export function RequestCreatePage() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="latitude">Latitud</Label>
-                <Input id="latitude" type="number" step="any" {...form.register("latitude")} />
-                {form.formState.errors.latitude && (
-                  <p className="text-sm text-red-600">
-                    {form.formState.errors.latitude.message}
-                  </p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label>Ubicación</Label>
 
-              <div className="space-y-2">
-                <Label htmlFor="longitude">Longitud</Label>
-                <Input id="longitude" type="number" step="any" {...form.register("longitude")} />
-                {form.formState.errors.longitude && (
-                  <p className="text-sm text-red-600">
-                    {form.formState.errors.longitude.message}
-                  </p>
-                )}
+              <LocationPicker
+                latitude={latitude}
+                longitude={longitude}
+                onChange={({ latitude, longitude }) => {
+                  form.setValue("latitude", latitude, {
+                    shouldDirty: true,
+                    shouldValidate: false,
+                    shouldTouch: true,
+                  })
+                  form.setValue("longitude", longitude, {
+                    shouldDirty: true,
+                    shouldValidate: false,
+                    shouldTouch: true,
+                  })
+                }}
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="latitude">Latitud</Label>
+                  <Input
+                    id="latitude"
+                    type="number"
+                    step="any"
+                    readOnly
+                    value={latitude ?? ""}
+                  />
+                  {form.formState.errors.latitude && (
+                    <p className="text-sm text-red-600">
+                      {form.formState.errors.latitude.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="longitude">Longitud</Label>
+                  <Input
+                    id="longitude"
+                    type="number"
+                    step="any"
+                    readOnly
+                    value={longitude ?? ""}
+                  />
+                  {form.formState.errors.longitude && (
+                    <p className="text-sm text-red-600">
+                      {form.formState.errors.longitude.message}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
