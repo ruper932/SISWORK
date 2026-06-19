@@ -141,10 +141,8 @@ export const registerSchema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
         "La contraseña debe incluir mayúscula, minúscula, número y carácter especial"
       ),
-    city: z.enum(BOLIVIAN_CITIES, {
-      errorMap: () => ({
-        message: `Selecciona una ciudad válida: ${BOLIVIAN_CITIES.join(", ")}`,
-      }),
+    city: z.string().refine((val) => BOLIVIAN_CITIES.includes(val as any), {
+      message: `Selecciona una ciudad válida: ${BOLIVIAN_CITIES.join(", ")}`,
     }),
     zone: z
       .string()
