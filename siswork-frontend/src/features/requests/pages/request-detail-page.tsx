@@ -103,6 +103,7 @@ export function RequestDetailPage() {
       requestApplications.find((application) => application.status === "ACCEPTED") ??
       requestApplications.find(
         (application) =>
+          assignedProfessionalProfileId !== null &&
           application.professional_profile_id === assignedProfessionalProfileId,
       ) ??
       null

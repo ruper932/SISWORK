@@ -1,7 +1,5 @@
-import { ModeToggle } from "@/components/mode-toggle"
-import { BadgeCheck } from "lucide-react"
-import { Link, NavLink, Outlet } from "react-router-dom"
 import {
+  BadgeCheck,
   LayoutDashboard,
   BriefcaseBusiness,
   Users,
@@ -10,7 +8,11 @@ import {
   ShieldCheck,
   LogOut,
   UserCog,
+  UserPen,
+  ChevronUp,
 } from "lucide-react"
+import { Link, NavLink, Outlet } from "react-router-dom"
+import { ModeToggle } from "@/components/mode-toggle"
 import { useAuth } from "@/features/auth/use-auth"
 
 type NavItem = {
@@ -65,18 +67,6 @@ const navItems: NavItem[] = [
     icon: BadgeCheck,
     allowedRoles: ["SUPPORT", "ADMIN", "SUPERADMIN"],
   },
-  {
-    to: "/support",
-    label: "Soporte",
-    icon: ShieldCheck,
-    allowedRoles: ["SUPPORT","ADMIN", "SUPERADMIN"],
-  },
-  /*{
-    to: "/admin",
-    label: "Admin",
-    icon: Settings,
-    allowedRoles: ["ADMIN", "SUPERADMIN"],
-  },*/
   
 ]
 
@@ -126,8 +116,7 @@ export function PrivateLayout() {
                     to={item.to}
                     className={({ isActive }) =>
                       [
-                        "group flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                        "rounded-xl",
+                        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive
                           ? "text-primary"
                           : "text-muted-foreground hover:text-foreground",
@@ -163,31 +152,81 @@ export function PrivateLayout() {
           </div>
 
           <div className="mt-auto border-t border-border/60 p-4">
-            <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-sm">
-              <p className="text-sm font-semibold text-foreground">
-                {user?.first_name} {user?.last_name}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">{user?.email}</p>
+            <div className="group relative">
+              <div
+                className="
+                  flex cursor-pointer items-center justify-between gap-3 rounded-2xl
+                  border border-border/60 bg-background/80 px-4 py-3 shadow-sm
+                  transition-colors duration-150 hover:bg-background
+                "
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {user?.first_name} {user?.last_name}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {user?.email}
+                  </p>
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                {userRoles.map((role) => (
-                  <span
-                    key={role}
-                    className="rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
-                  >
-                    {role}
-                  </span>
-                ))}
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {userRoles.map((role) => (
+                      <span
+                        key={role}
+                        className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                      >
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <ChevronUp
+                  className="
+                    h-4 w-4 shrink-0 text-muted-foreground
+                    transition-all duration-150
+                    group-hover:-translate-y-0.5 group-hover:text-foreground
+                    group-focus-within:-translate-y-0.5 group-focus-within:text-foreground
+                  "
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={logout}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium transition hover:bg-muted"
+              <div className="absolute inset-x-0 bottom-full h-3" />
+
+              <div
+                className="
+                  pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-0 right-0 z-40
+                  origin-bottom rounded-2xl border border-border/60 bg-background/95 p-2
+                  opacity-0 shadow-lg backdrop-blur-md
+                  scale-[0.98] transition-all duration-150 ease-out
+                  group-hover:pointer-events-auto group-hover:opacity-100 group-hover:scale-100
+                  group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100
+                "
               >
-                <LogOut className="h-4 w-4" />
-                Cerrar sesión
-              </button>
+                <Link
+                  to="/account/profile"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:bg-muted"
+                >
+                  <UserPen className="h-4 w-4 text-muted-foreground" />
+                  Perfil
+                </Link>
+
+                <Link
+                  to="/account/security"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:bg-muted"
+                >
+                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                  Seguridad
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Salir
+                </button>
+              </div>
             </div>
           </div>
         </aside>
@@ -205,7 +244,16 @@ export function PrivateLayout() {
               </div>
 
               <div className="flex items-center gap-3">
+                <Link
+                  to="/account/security"
+                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="hidden sm:inline">Seguridad</span>
+                </Link>
+
                 <ModeToggle />
+
                 <div className="hidden rounded-full border border-border bg-card px-4 py-2 text-sm text-muted-foreground sm:block">
                   {user?.city || "Sin ciudad"}
                 </div>

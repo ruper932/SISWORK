@@ -1,7 +1,7 @@
 export interface SpecialtySimple {
   id: string
   name: string
-  description: string
+  description: string | null
 }
 
 export interface ProfessionalAvailability {

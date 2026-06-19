@@ -1,51 +1,53 @@
-import api from "@/lib/axios"
+// src/features/applications/api.ts
+
+import { api } from "@/lib/axios"
 import type {
-  ApplicationCreateInput,
-  ApplicationItem,
+  ApplicationCreate,
   ApplicationListResponse,
+  ApplicationResponse,
 } from "./types"
 
-export async function createApplication(payload: ApplicationCreateInput) {
-  const { data } = await api.post<ApplicationItem>("/applications", payload)
+export async function createApplication(payload: ApplicationCreate) {
+  const { data } = await api.post<ApplicationResponse>("/applications", payload)
   return data
 }
 
-export async function listMyApplications() {
+export async function getMyApplications() {
   const { data } = await api.get<ApplicationListResponse>("/applications/me")
   return data
 }
 
 export async function getApplicationById(applicationId: string) {
-  const { data } = await api.get<ApplicationItem>(
-    `/applications/${applicationId}`,
+  const { data } = await api.get<ApplicationResponse>(
+    `/applications/${applicationId}`
   )
   return data
 }
 
-export async function listRequestApplications(requestId: string) {
+export async function getRequestApplications(requestId: string) {
   const { data } = await api.get<ApplicationListResponse>(
-    `/applications/request/${requestId}`,
+    `/applications/request/${requestId}`
   )
   return data
 }
 
 export async function acceptApplication(applicationId: string) {
-  const { data } = await api.post<ApplicationItem>(
-    `/applications/${applicationId}/accept`,
+  const { data } = await api.post<ApplicationResponse>(
+    `/applications/${applicationId}/accept`
   )
   return data
 }
 
 export async function rejectApplication(applicationId: string) {
-  const { data } = await api.post<ApplicationItem>(
-    `/applications/${applicationId}/reject`,
+  const { data } = await api.post<ApplicationResponse>(
+    `/applications/${applicationId}/reject`
   )
   return data
 }
 
 export async function cancelMyApplication(applicationId: string) {
-  const { data } = await api.post<ApplicationItem>(
-    `/applications/${applicationId}/cancel`,
+  const { data } = await api.post<ApplicationResponse>(
+    `/applications/${applicationId}/cancel`
   )
   return data
 }

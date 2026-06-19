@@ -10,6 +10,8 @@ import {
   History,
   Search,
   Filter,
+  Eye,
+  EyeOff,
 } from "lucide-react"
 
 import { useRequestsQuery } from "../hooks"
@@ -209,6 +211,7 @@ export function RequestsListPage() {
   const [minBudget, setMinBudget] = useState("")
   const [maxBudget, setMaxBudget] = useState("")
   const [sortBy, setSortBy] = useState("updated_desc")
+  const [showOutsideSpecialty, setShowOutsideSpecialty] = useState(false)
 
   const allRequests = data?.items ?? []
   const userRoles = user?.roles ?? []
@@ -220,11 +223,32 @@ export function RequestsListPage() {
     userRoles.includes("SUPPORT") ||
     userRoles.includes("SUPERADMIN")
 
-  const baseRequests = canViewAllRequests || isProfessional
+  // TODO: reemplaza esta fuente por tu hook/estado real del perfil profesional.
+  // Debe terminar siendo un array de IDs de especialidades del profesional autenticado.
+  // Ejemplo esperado: ["uuid-specialty-1", "uuid-specialty-2"]
+  const professionalSpecialtyIds: string[] = []
+
+  const professionalRequestsInSpecialty = isProfessional
+    ? allRequests.filter((request) =>
+        professionalSpecialtyIds.includes(request.specialty_id),
+      )
+    : []
+
+  const professionalRequestsOutsideSpecialty = isProfessional
+    ? allRequests.filter(
+        (request) => !professionalSpecialtyIds.includes(request.specialty_id),
+      )
+    : []
+
+  const baseRequests = canViewAllRequests
     ? allRequests
-    : isClient
-      ? allRequests.filter((request) => request.client_ci === user?.ci)
-      : []
+    : isProfessional
+      ? showOutsideSpecialty
+        ? professionalRequestsOutsideSpecialty
+        : professionalRequestsInSpecialty
+      : isClient
+        ? allRequests.filter((request) => request.client_ci === user?.ci)
+        : []
 
   const requestsWithoutHistory =
     canViewAllRequests || isProfessional
@@ -354,19 +378,36 @@ export function RequestsListPage() {
     setSortBy("updated_desc")
   }
 
-  const pageTitle = canViewAllRequests || isProfessional
+  const pageTitle = canViewAllRequests
     ? "Explora solicitudes disponibles"
-    : "Tus solicitudes"
+    : isProfessional
+      ? showOutsideSpecialty
+        ? "Solicitudes fuera de tu especialidad"
+        : "Solicitudes relacionadas a tu especialidad"
+      : "Tus solicitudes"
 
-  const pageDescription = canViewAllRequests || isProfessional
+  const pageDescription = canViewAllRequests
     ? "Encuentra oportunidades activas, revisa presupuestos, urgencia y ubicación, y accede a cada detalle desde un solo panel."
-    : "Revisa las solicitudes activas que publicaste, filtra por estado, ubicación, urgencia o presupuesto, y accede también a tu historial."
+    : isProfessional
+      ? showOutsideSpecialty
+        ? "Aquí ves solicitudes abiertas que no pertenecen a tu especialidad principal."
+        : "Aquí ves solicitudes abiertas alineadas con tu especialidad para postularte más rápido."
+      : "Revisa las solicitudes activas que publicaste, filtra por estado, ubicación, urgencia o presupuesto, y accede también a tu historial."
 
   const recommendedAction = isProfessional
-    ? "Postúlate a nuevas solicitudes"
+    ? showOutsideSpecialty
+      ? "Explora fuera de tu especialidad"
+      : "Postúlate a solicitudes de tu especialidad"
     : canViewAllRequests
       ? "Revisa nuevas oportunidades"
       : "Gestiona tus solicitudes"
+
+  const specialtySummary =
+    isProfessional && !canViewAllRequests
+      ? showOutsideSpecialty
+        ? `Mostrando ${professionalRequestsOutsideSpecialty.length} solicitudes fuera de tu especialidad`
+        : `Mostrando ${professionalRequestsInSpecialty.length} solicitudes de tu especialidad`
+      : null
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -385,9 +426,15 @@ export function RequestsListPage() {
             <p className="mt-3 max-w-xl text-sm leading-6 text-primary-foreground/80 sm:text-base">
               {pageDescription}
             </p>
+
+            {specialtySummary && (
+              <p className="mt-3 text-sm text-primary-foreground/80">
+                {specialtySummary}
+              </p>
+            )}
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {!canViewAllRequests && !isProfessional && (
               <Link
                 to="/requests/history"
@@ -396,6 +443,26 @@ export function RequestsListPage() {
                 <History className="h-4 w-4" />
                 Ver historial
               </Link>
+            )}
+
+            {isProfessional && !canViewAllRequests && (
+              <button
+                type="button"
+                onClick={() => setShowOutsideSpecialty((prev) => !prev)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/15"
+              >
+                {showOutsideSpecialty ? (
+                  <>
+                    <EyeOff className="h-4 w-4" />
+                    Ver solicitudes de tu especialidad
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    Ver solicitudes fuera de tu especialidad
+                  </>
+                )}
+              </button>
             )}
 
             {!isProfessional && (
@@ -438,16 +505,24 @@ export function RequestsListPage() {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">
-            {canViewAllRequests || isProfessional
+            {canViewAllRequests
               ? "Listado de solicitudes"
-              : "Listado de tus solicitudes"}
+              : isProfessional
+                ? showOutsideSpecialty
+                  ? "Listado fuera de tu especialidad"
+                  : "Listado de tu especialidad"
+                : "Listado de tus solicitudes"}
           </h2>
         </div>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          {canViewAllRequests || isProfessional
+          {canViewAllRequests
             ? "Aplica filtros por texto, estado, urgencia, ubicación, presupuesto y orden."
-            : "Aquí se muestran tus solicitudes no completadas. Las completadas se encuentran en el historial."}
+            : isProfessional
+              ? showOutsideSpecialty
+                ? "Aquí se muestran solicitudes abiertas que no coinciden con tu especialidad."
+                : "Aquí se muestran solicitudes abiertas relacionadas a tu especialidad."
+              : "Aquí se muestran tus solicitudes no completadas. Las completadas se encuentran en el historial."}
         </p>
 
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -613,8 +688,7 @@ export function RequestsListPage() {
 
       {isError && (
         <section className="mt-6 rounded-3xl border border-destructive/20 bg-destructive/10 px-5 py-4 text-sm text-destructive">
-          No se pudieron cargar las solicitudes. Intenta nuevamente en unos
-          momentos.
+          No se pudieron cargar las solicitudes. Intenta nuevamente en unos momentos.
         </section>
       )}
 
@@ -635,9 +709,13 @@ export function RequestsListPage() {
                 No hay solicitudes disponibles
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                {canViewAllRequests || isProfessional
+                {canViewAllRequests
                   ? "No hay resultados con los filtros actuales."
-                  : "No tienes solicitudes activas que coincidan con los filtros aplicados."}
+                  : isProfessional
+                    ? showOutsideSpecialty
+                      ? "No hay solicitudes fuera de tu especialidad con los filtros actuales."
+                      : "No hay solicitudes de tu especialidad con los filtros actuales."
+                    : "No tienes solicitudes activas que coincidan con los filtros aplicados."}
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <button

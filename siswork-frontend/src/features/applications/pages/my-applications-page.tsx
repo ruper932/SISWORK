@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { useCancelMyApplicationMutation, useMyApplicationsQuery } from "../hooks"
-import type { ApplicationItem } from "../types"
+import type { ApplicationResponse } from "../types"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 
 function formatMoney(value: string | null) {
   if (!value) return "—"
+
   const numberValue = Number(value)
   if (Number.isNaN(numberValue)) return value
 
@@ -18,7 +19,7 @@ function formatMoney(value: string | null) {
   }).format(numberValue)
 }
 
-function getStatusLabel(status: string) {
+function getStatusLabel(status: ApplicationResponse["status"]) {
   switch (status) {
     case "PENDING":
       return "Pendiente"
@@ -26,10 +27,6 @@ function getStatusLabel(status: string) {
       return "Aceptada"
     case "REJECTED":
       return "Rechazada"
-    case "WITHDRAWN":
-      return "Retirada"
-    case "COMPLETED":
-      return "Completada"
     case "CANCELLED":
       return "Cancelada"
     default:
@@ -37,7 +34,7 @@ function getStatusLabel(status: string) {
   }
 }
 
-function getStatusClasses(status: string) {
+function getStatusClasses(status: ApplicationResponse["status"]) {
   switch (status) {
     case "PENDING":
       return "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400"
@@ -45,10 +42,6 @@ function getStatusClasses(status: string) {
       return "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
     case "REJECTED":
       return "border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-400"
-    case "WITHDRAWN":
-      return "border-zinc-500/20 bg-zinc-500/10 text-zinc-700 dark:text-zinc-400"
-    case "COMPLETED":
-      return "border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-400"
     case "CANCELLED":
       return "border-slate-500/20 bg-slate-500/10 text-slate-700 dark:text-slate-300"
     default:
@@ -61,7 +54,7 @@ function ApplicationCard({
   onCancel,
   isCancelling,
 }: {
-  application: ApplicationItem
+  application: ApplicationResponse
   onCancel: (applicationId: string) => void
   isCancelling: boolean
 }) {
@@ -75,6 +68,7 @@ function ApplicationCard({
             <h3 className="text-base font-semibold">
               Solicitud {application.request_id}
             </h3>
+
             <div className="mt-2">
               <Badge
                 variant="outline"
@@ -137,7 +131,7 @@ export function MyApplicationsPage() {
   const { data, isLoading, isError } = useMyApplicationsQuery()
   const cancelMutation = useCancelMyApplicationMutation()
 
-  const applications = data?.items ?? []
+  const applications: ApplicationResponse[] = data?.items ?? []
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8">
@@ -158,7 +152,7 @@ export function MyApplicationsPage() {
 
       {!isLoading && !isError && (
         <div className="mt-6 grid gap-4">
-          {applications.length ? (
+          {applications.length > 0 ? (
             applications.map((application) => (
               <ApplicationCard
                 key={application.id}

@@ -37,6 +37,10 @@ import { UsersAdminPage } from "@/features/users/pages/users-admin-page"
 import { MyProfessionalRequestPage } from "@/features/professional-requests/pages/my-professional-request-page"
 import { PendingProfessionalRequestsPage } from "@/features/professional-requests/pages/pending-professional-requests-page"
 
+import { Login2FAPage } from "@/features/auth/login-2fa-page"
+import { SecurityPage } from "@/features/account/pages/security-page"
+import { ProfilePage } from "@/features/account/pages/profile-page"
+
 function NotFoundPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
@@ -64,6 +68,10 @@ export const router = createBrowserRouter([
             element: <LoginPage />,
           },
           {
+            path: "/login/2fa",
+            element: <Login2FAPage />,
+          },
+          {
             path: "/register",
             element: <RegisterPage />,
           },
@@ -81,7 +89,14 @@ export const router = createBrowserRouter([
             path: "/dashboard",
             element: <DashboardPage />,
           },
-
+          {
+            path: "/account/profile",
+            element: <ProfilePage />,
+          },
+          {
+            path: "/account/security",
+            element: <SecurityPage />,
+          },
           {
             path: "/requests",
             element: <RequestsListPage />,
@@ -98,7 +113,6 @@ export const router = createBrowserRouter([
             path: "/requests/:requestId",
             element: <RequestDetailPage />,
           },
-
           {
             path: "/professionals",
             element: <ProfessionalsListPage />,
@@ -111,7 +125,6 @@ export const router = createBrowserRouter([
             path: "/professionals/request-verification",
             element: <RequestVerificationPage />,
           },
-
           {
             path: "/applications/me",
             element: <MyApplicationsPage />,
@@ -124,7 +137,6 @@ export const router = createBrowserRouter([
             path: "/applications/request/:requestId",
             element: <RequestApplicationsPage />,
           },
-
           {
             path: "/reviews/me",
             element: <MyReviewsPage />,

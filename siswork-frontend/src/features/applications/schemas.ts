@@ -8,7 +8,7 @@ const requiredNumber = (label: string) =>
       if (typeof value === "string") return Number(value)
       return value
     },
-    z.number({ error: `${label} debe ser numérico` }),
+    z.number({ error: `${label} debe ser numérico` })
   )
 
 export const applicationCreateSchema = z.object({

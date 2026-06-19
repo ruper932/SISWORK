@@ -19,11 +19,17 @@ export interface User {
   is_active: boolean
   is_verified: boolean
   roles: UserRole[]
+  totp_enabled?: boolean
 }
 
 export interface LoginFormValues {
   username: string
   password: string
+}
+
+export interface Login2FAValues {
+  temp_token: string
+  code: string
 }
 
 export interface RegisterFormValues {
@@ -40,6 +46,9 @@ export interface RegisterFormValues {
 }
 
 export interface TokenResponse {
-  access_token: string
+  requires_2fa: boolean
+  access_token: string | null
   token_type: string
+  temp_token: string | null
+  message?: string
 }

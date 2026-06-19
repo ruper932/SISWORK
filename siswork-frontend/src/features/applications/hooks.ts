@@ -4,11 +4,11 @@ import {
   cancelMyApplication,
   createApplication,
   getApplicationById,
-  listMyApplications,
-  listRequestApplications,
+  getMyApplications,
+  getRequestApplications,
   rejectApplication,
 } from "./api"
-import type { ApplicationCreateInput } from "./types"
+import type { ApplicationCreate } from "./types"
 
 export const applicationKeys = {
   all: ["applications"] as const,
@@ -24,7 +24,7 @@ export const applicationKeys = {
 export function useMyApplicationsQuery() {
   return useQuery({
     queryKey: applicationKeys.mine(),
-    queryFn: listMyApplications,
+    queryFn: getMyApplications,
   })
 }
 
@@ -39,7 +39,7 @@ export function useApplicationQuery(applicationId: string) {
 export function useRequestApplicationsQuery(requestId: string) {
   return useQuery({
     queryKey: applicationKeys.requestList(requestId),
-    queryFn: () => listRequestApplications(requestId),
+    queryFn: () => getRequestApplications(requestId),
     enabled: Boolean(requestId),
   })
 }
@@ -48,7 +48,7 @@ export function useCreateApplicationMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (payload: ApplicationCreateInput) => createApplication(payload),
+    mutationFn: (payload: ApplicationCreate) => createApplication(payload),
     onSuccess: async (created) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: applicationKeys.all }),
@@ -95,6 +95,7 @@ export function useRejectApplicationMutation() {
         queryClient.invalidateQueries({
           queryKey: applicationKeys.requestList(updated.request_id),
         }),
+        queryClient.invalidateQueries({ queryKey: ["requests"] }),
       ])
     },
   })
@@ -114,6 +115,7 @@ export function useCancelMyApplicationMutation() {
         queryClient.invalidateQueries({
           queryKey: applicationKeys.requestList(updated.request_id),
         }),
+        queryClient.invalidateQueries({ queryKey: ["requests"] }),
       ])
     },
   })
