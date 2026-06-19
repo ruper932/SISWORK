@@ -1,8 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import type { ReactNode } from "react"
-import { useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { Link } from "react-router-dom"
+import React, { type ReactNode, type ReactElement } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   CalendarDays,
@@ -12,13 +12,29 @@ import {
   Phone,
   ShieldCheck,
   UserRound,
-} from "lucide-react"
-import { registerSchema, type RegisterSchema } from "./schemas"
-import { useRegisterMutation } from "./hooks"
-import { getApiErrorMessage, getApiFieldErrors } from "@/lib/api-error"
+} from "lucide-react";
+import { registerSchema, type RegisterSchema } from "./schemas";
+import { useRegisterMutation } from "./hooks";
+import { getApiErrorMessage, getApiFieldErrors } from "@/lib/api-error";
+
+// Ciudades más conocidas de Bolivia
+const BOLIVIAN_CITIES = [
+  "La Paz",
+  "Santa Cruz",
+  "Cochabamba",
+  "Sucre",
+  "Potosí",
+  "Oruro",
+  "Tarija",
+  "Cobija",
+  "Trinidad",
+  "El Alto",
+  "Villa Tunari",
+  "Riberalta",
+] as const;
 
 export function RegisterPage() {
-  const registerMutation = useRegisterMutation()
+  const registerMutation = useRegisterMutation();
 
   const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
@@ -31,27 +47,27 @@ export function RegisterPage() {
       email: "",
       phone: "",
       password: "",
-      city: "",
+      city: BOLIVIAN_CITIES[0],
       zone: "",
     },
-  })
+  });
 
   useEffect(() => {
-    if (!registerMutation.isError) return
+    if (!registerMutation.isError) return;
 
-    const fieldErrors = getApiFieldErrors(registerMutation.error)
+    const fieldErrors = getApiFieldErrors(registerMutation.error);
 
     Object.entries(fieldErrors).forEach(([field, message]) => {
       form.setError(field as keyof RegisterSchema, {
         type: "server",
         message,
-      })
-    })
-  }, [registerMutation.isError, registerMutation.error, form])
+      });
+    });
+  }, [registerMutation.isError, registerMutation.error, form]);
 
   const onSubmit = async (values: RegisterSchema) => {
-    await registerMutation.mutateAsync(values)
-  }
+    await registerMutation.mutateAsync(values);
+  };
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-background">
@@ -105,10 +121,7 @@ export function RegisterPage() {
               </p>
             </div>
 
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormSection
                 title="Identidad"
                 description="Datos principales para identificar tu cuenta."
@@ -226,7 +239,7 @@ export function RegisterPage() {
                     <input
                       id="email"
                       type="email"
-                      placeholder="tucorreo@ejemplo.com"
+                      placeholder="tucorreo@gmail.com"
                       className="input-auth"
                       {...form.register("email")}
                     />
@@ -238,13 +251,17 @@ export function RegisterPage() {
                     icon={<MapPin className="h-4 w-4" />}
                     error={form.formState.errors.city?.message}
                   >
-                    <input
+                    <select
                       id="city"
-                      type="text"
-                      placeholder="Ciudad"
                       className="input-auth"
                       {...form.register("city")}
-                    />
+                    >
+                      {BOLIVIAN_CITIES.map((city: string) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
 
                   <Field
@@ -308,13 +325,15 @@ export function RegisterPage() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
+// ---------- Componentes auxiliares ----------
+
 interface FormSectionProps {
-  title: string
-  description: string
-  children: ReactNode
+  title: string;
+  description: string;
+  children: ReactNode;
 }
 
 function FormSection({ title, description, children }: FormSectionProps) {
@@ -326,18 +345,23 @@ function FormSection({ title, description, children }: FormSectionProps) {
       </div>
       {children}
     </div>
-  )
+  );
 }
 
 interface FieldProps {
-  id: string
-  label: string
-  error?: string
-  icon?: ReactNode
-  children: ReactNode
+  id: string;
+  label: string;
+  error?: string;
+  icon?: ReactNode;
+  children: ReactNode;
 }
 
 function Field({ id, label, error, icon, children }: FieldProps) {
+  // Aseguramos que solo hay un hijo y lo tipamos como ReactElement
+  const child = React.Children.only(children) as ReactElement<any>;
+  const childClassName = child.props.className || "";
+  const newClassName = icon ? `${childClassName} pl-10` : childClassName;
+
   return (
     <div className="space-y-2">
       <label htmlFor={id} className="text-sm font-medium text-foreground">
@@ -350,12 +374,12 @@ function Field({ id, label, error, icon, children }: FieldProps) {
             {icon}
           </div>
         )}
-        {children}
+        {React.cloneElement(child, { className: newClassName })}
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
-  )
+  );
 }
 
 function FeatureItem({ children }: { children: ReactNode }) {
@@ -366,5 +390,5 @@ function FeatureItem({ children }: { children: ReactNode }) {
       </div>
       <p className="text-sm leading-6 text-muted-foreground">{children}</p>
     </div>
-  )
+  );
 }
