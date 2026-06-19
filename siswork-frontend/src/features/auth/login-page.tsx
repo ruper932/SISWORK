@@ -126,12 +126,7 @@ export function LoginPage() {
                     Contraseña
                   </label>
 
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-primary transition hover:opacity-80"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </button>
+                  
                 </div>
 
                 <div className="relative">

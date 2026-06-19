@@ -5,12 +5,18 @@ import { loginWith2FA } from "./api"
 import { useAuth } from "./use-auth"
 import { setAccessToken } from "./auth-storage"
 
+type Login2FALocationState = {
+  temp_token?: string
+}
+
 export function Login2FAPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const auth = useAuth()
-  const tempToken = location.state?.temp_token
-  
+
+  const state = location.state as Login2FALocationState | null
+  const tempToken = state?.temp_token ?? null
+
   const [code, setCode] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -19,16 +25,35 @@ export function Login2FAPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const safeTempToken = tempToken
+
+    if (!safeTempToken) {
+      setError("Sesión de verificación no válida")
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
     try {
-      const response = await loginWith2FA({ temp_token: tempToken, code })
-      setAccessToken(response.access_token)
+      const response = await loginWith2FA({
+        temp_token: safeTempToken,
+        code,
+      })
+
+      const accessToken = response.access_token
+
+      if (!accessToken) {
+        throw new Error("La respuesta no contiene un token válido")
+      }
+
+      setAccessToken(accessToken)
+
       const user = await auth.refreshMe()
-      
       const roles = user?.roles || []
       const redirectTo = roles.includes("ADMIN") ? "/admin" : "/dashboard"
+
       navigate(redirectTo, { replace: true })
     } catch (err: any) {
       setError(err.response?.data?.detail || "Código incorrecto")
@@ -44,9 +69,12 @@ export function Login2FAPage() {
           <div className="mb-4 rounded-full bg-primary/10 p-3 text-primary">
             <ShieldCheck className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Autenticación en dos pasos</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Autenticación en dos pasos
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Ingresa el código de 6 dígitos generado por tu aplicación autenticadora (ej. Authy).
+            Ingresa el código de 6 dígitos generado por tu aplicación autenticadora
+            (ej. Authy).
           </p>
         </div>
 
@@ -62,7 +90,9 @@ export function Login2FAPage() {
               className="h-14 w-full rounded-xl border border-border bg-background px-4 text-center text-2xl tracking-[0.5em] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+
+          {error && <p className="text-center text-sm text-destructive">{error}</p>}
+
           <button
             type="submit"
             disabled={isLoading || code.length !== 6}

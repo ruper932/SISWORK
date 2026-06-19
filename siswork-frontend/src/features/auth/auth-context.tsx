@@ -10,12 +10,20 @@ import { getMe, login as loginRequest } from "./api"
 import { clearAccessToken, getAccessToken, setAccessToken } from "./auth-storage"
 import type { LoginFormValues, User } from "./types"
 
+type LoginResult =
+  | { status: "authenticated"; user: User }
+  | {
+      status: "requires_2fa"
+      temp_token: string
+      message?: string
+    }
+
 interface AuthContextValue {
   user: User | null
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (values: LoginFormValues) => Promise<User>
+  login: (values: LoginFormValues) => Promise<LoginResult>
   logout: () => void
   refreshMe: () => Promise<User | null>
 }
@@ -56,14 +64,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void refreshMe()
   }, [refreshMe])
 
-  const login = useCallback(async (values: LoginFormValues) => {
+  const login = useCallback(async (values: LoginFormValues): Promise<LoginResult> => {
     const response = await loginRequest(values)
-    setAccessToken(response.access_token)
-    setTokenState(response.access_token)
 
-    const me = await getMe()
-    setUser(me)
-    return me
+    if ("access_token" in response) {
+      const accessToken = response.access_token
+
+      if (!accessToken) {
+        throw new Error("La respuesta de autenticación no contiene un access token válido")
+      }
+
+      setAccessToken(accessToken)
+      setTokenState(accessToken)
+
+      const me = await getMe()
+      setUser(me)
+
+      return {
+        status: "authenticated",
+        user: me,
+      }
+    }
+
+    if ("requires_2fa" in response && response.requires_2fa) {
+      return {
+        status: "requires_2fa",
+        temp_token: response.temp_token,
+        message: response.message,
+      }
+    }
+
+    throw new Error("Respuesta de autenticación no válida")
   }, [])
 
   const logout = useCallback(() => {
